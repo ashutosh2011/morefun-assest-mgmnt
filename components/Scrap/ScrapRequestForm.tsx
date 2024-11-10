@@ -15,7 +15,7 @@ export function ScrapRequestForm() {
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
           >
             <option value="">Choose an asset</option>
-            <option value="ast001">AST001 - MacBook Pro 16"</option>
+            <option value="ast001">AST001 - MacBook Pro 16&quot;</option>
             <option value="ast002">AST002 - Dell XPS Desktop</option>
           </select>
         </div>
