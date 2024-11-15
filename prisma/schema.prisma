@@ -1,0 +1,162 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Asset {
+  id                String           @id @default(uuid())
+  assetName         String
+  description       String?
+  quantity         Int
+  dateOfPurchase   DateTime
+  purchaseValue    Float
+  depreciationValue Float
+  assetUsageStatus String           // IN_USE, IDLE, SCRAPPED
+  remarks          String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  // Relations
+  department       Department       @relation(fields: [departmentId], references: [id])
+  departmentId     String
+  user            User             @relation(fields: [userId], references: [id])
+  userId          String
+  assetType       AssetType        @relation(fields: [assetTypeId], references: [id])
+  assetTypeId     String
+  scrapRequests   ScrapRequest[]
+
+  @@map("assets")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  username      String    @unique
+  password      String
+  fullName      String
+  email         String    @unique
+  phoneNumber   String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  department    Department @relation(fields: [departmentId], references: [id])
+  departmentId  String
+  role          Role       @relation(fields: [roleId], references: [id])
+  roleId        String
+  assets        Asset[]
+  scrapRequests ScrapRequest[] @relation("RequestedBy")
+  approvals     Approval[]
+
+  @@map("users")
+}
+
+model Department {
+  id             String   @id @default(uuid())
+  departmentName String   @unique
+  region         String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  users          User[]
+  assets         Asset[]
+
+  @@map("departments")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  roleName    String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  users       User[]
+  approvalLevels ApprovalLevel[]
+
+  @@map("roles")
+}
+
+model AssetType {
+  id            String   @id @default(uuid())
+  assetTypeName String   @unique
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  assets        Asset[]
+  approvalLevels ApprovalLevel[]
+
+  @@map("asset_types")
+}
+
+model ScrapRequest {
+  id                    String             @id @default(uuid())
+  requestDate           DateTime           @default(now())
+  reason               String
+  status               String             // PENDING, APPROVED, REJECTED
+  remarks              String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  // Relations
+  asset                Asset              @relation(fields: [assetId], references: [id])
+  assetId              String
+  requestedBy          User               @relation("RequestedBy", fields: [requestedById], references: [id])
+  requestedById        String
+  currentApprovalLevel ApprovalLevel      @relation(fields: [currentApprovalLevelId], references: [id])
+  currentApprovalLevelId String
+  approvals           Approval[]
+
+  @@map("scrap_requests")
+}
+
+model Approval {
+  id              String         @id @default(uuid())
+  approvalDate    DateTime      @default(now())
+  status          String        // APPROVED, REJECTED
+  comments        String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  scrapRequest    ScrapRequest  @relation(fields: [scrapRequestId], references: [id])
+  scrapRequestId  String
+  approvalLevel   ApprovalLevel @relation(fields: [approvalLevelId], references: [id])
+  approvalLevelId String
+  approver        User         @relation(fields: [approverId], references: [id])
+  approverId      String
+
+  @@map("approvals")
+}
+
+model ApprovalLevel {
+  id           String    @id @default(uuid())
+  levelNumber  Int
+  description String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  role         Role      @relation(fields: [roleId], references: [id])
+  roleId       String
+  assetType    AssetType @relation(fields: [assetTypeId], references: [id])
+  assetTypeId  String
+  nextLevel    ApprovalLevel? @relation("ApprovalLevelFlow", fields: [nextLevelId], references: [id])
+  nextLevelId  String?       @unique
+  previousLevel ApprovalLevel? @relation("ApprovalLevelFlow")
+  scrapRequests ScrapRequest[]
+  approvals     Approval[]
+
+  @@map("approval_levels")
+}
