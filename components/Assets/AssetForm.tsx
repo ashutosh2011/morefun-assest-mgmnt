@@ -25,34 +25,73 @@ interface AssetCategory {
   name: string;
 }
 
+interface AssetFormData {
+  name: string;
+  assetTypeId: string;
+  serialNumber: string;
+  purchaseDate: string;
+  assignedUserId: string;
+  description: string;
+  branchId: string;
+  departmentId: string;
+  assetCategoryId: string;
+  purchaseValue: string;
+  depreciationRate: string;
+  usefulLife: string;
+}
+
+interface Department {
+  id: string;
+  departmentName: string;
+}
+
 export function AssetForm() {
   const [users, setUsers] = useState<User[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [assetTypes, setAssetTypes] = useState<AssetType[]>([]);
   const [assetCategories, setAssetCategories] = useState<AssetCategory[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [formData, setFormData] = useState<AssetFormData>({
+    name: '',
+    assetTypeId: '',
+    serialNumber: '',
+    purchaseDate: '',
+    assignedUserId: '',
+    description: '',
+    branchId: '',
+    departmentId: '',
+    assetCategoryId: '',
+    purchaseValue: '',
+    depreciationRate: '',
+    usefulLife: '',
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [usersRes, branchesRes, typesRes, categoriesRes] = await Promise.all([
+        const [usersRes, branchesRes, typesRes, categoriesRes, departmentsRes] = await Promise.all([
           fetchWithAuth('/api/users'),
           fetchWithAuth('/api/branches'),
           fetchWithAuth('/api/asset-types'),
           fetchWithAuth('/api/asset-categories'),
+          fetchWithAuth('/api/departments'),
         ]);
 
-        const [usersData, branchesData, typesData, categoriesData] = await Promise.all([
+        const [usersData, branchesData, typesData, categoriesData, departmentsData] = await Promise.all([
           usersRes.json(),
           branchesRes.json(),
           typesRes.json(),
           categoriesRes.json(),
+          departmentsRes.json(),
         ]);
 
         setUsers(usersData);
         setBranches(branchesData);
         setAssetTypes(typesData);
         setAssetCategories(categoriesData);
+        setDepartments(departmentsData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -63,12 +102,58 @@ export function AssetForm() {
     fetchData();
   }, []);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const response = await fetchWithAuth('/api/assets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create asset');
+      }
+
+      // Reset form after successful submission
+      setFormData({
+        name: '',
+        assetTypeId: '',
+        serialNumber: '',
+        purchaseDate: '',
+        assignedUserId: '',
+        description: '',
+        branchId: '',
+        departmentId: '',
+        assetCategoryId: '',
+        purchaseValue: '',
+        depreciationRate: '',
+        usefulLife: '',
+      });
+
+      // You might want to add a success message or redirect here
+    } catch (error) {
+      console.error('Error creating asset:', error);
+      // Handle error (show error message to user)
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <form className="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-[#2C3E50] mb-1">
@@ -77,6 +162,9 @@ export function AssetForm() {
           </label>
           <input
             type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
             required
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
           />
@@ -89,6 +177,9 @@ export function AssetForm() {
               <span className="text-[#E74C3C]">*</span>
             </label>
             <select
+              name="assetTypeId"
+              value={formData.assetTypeId}
+              onChange={handleChange}
               required
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
             >
@@ -108,6 +199,9 @@ export function AssetForm() {
             </label>
             <input
               type="text"
+              name="serialNumber"
+              value={formData.serialNumber}
+              onChange={handleChange}
               required
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
             />
@@ -123,6 +217,9 @@ export function AssetForm() {
             <div className="relative">
               <input
                 type="date"
+                name="purchaseDate"
+                value={formData.purchaseDate}
+                onChange={handleChange}
                 required
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
               />
@@ -134,7 +231,12 @@ export function AssetForm() {
             <label className="block text-sm font-medium text-[#2C3E50] mb-1">
               Assigned User
             </label>
-            <select className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]">
+            <select
+              name="assignedUserId"
+              value={formData.assignedUserId}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
+            >
               <option value="">Select User</option>
               {users && users.length > 0 && users.map((user) => (
                 <option key={user.id} value={user.id}>
@@ -150,18 +252,24 @@ export function AssetForm() {
             Description
           </label>
           <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
             rows={4}
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
           ></textarea>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-sm font-medium text-[#2C3E50] mb-1">
               Branch
               <span className="text-[#E74C3C]">*</span>
             </label>
             <select
+              name="branchId"
+              value={formData.branchId}
+              onChange={handleChange}
               required
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
             >
@@ -176,10 +284,34 @@ export function AssetForm() {
 
           <div>
             <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+              Department
+              <span className="text-[#E74C3C]">*</span>
+            </label>
+            <select
+              name="departmentId"
+              value={formData.departmentId}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
+            >
+              <option value="">Select Department</option>
+              {departments && departments.length > 0 && departments.map((department) => (
+                <option key={department.id} value={department.id}>
+                  {department.departmentName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
               Asset Category
               <span className="text-[#E74C3C]">*</span>
             </label>
             <select
+              name="assetCategoryId"
+              value={formData.assetCategoryId}
+              onChange={handleChange}
               required
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
             >
@@ -201,6 +333,9 @@ export function AssetForm() {
             </label>
             <input
               type="number"
+              name="purchaseValue"
+              value={formData.purchaseValue}
+              onChange={handleChange}
               required
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
             />
@@ -213,6 +348,9 @@ export function AssetForm() {
             </label>
             <input
               type="number"
+              name="depreciationRate"
+              value={formData.depreciationRate}
+              onChange={handleChange}
               required
               min="0"
               max="100"
@@ -227,6 +365,9 @@ export function AssetForm() {
             </label>
             <input
               type="number"
+              name="usefulLife"
+              value={formData.usefulLife}
+              onChange={handleChange}
               required
               min="1"
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
+import { Prisma } from '@prisma/client';
 
 export async function POST(request: Request) {
   try {
@@ -10,28 +11,50 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
+    data.salvageValue = 0;
+    data.remarks = data.remarks || "";
+
+    console.log("received data",data);
     
     const asset = await prisma.asset.create({
       data: {
-        assetName: data.assetName,
+        assetName: data.name,
         description: data.description,
         serialNumber: data.serialNumber,
-        quantity: parseInt(data.quantity),
-        dateOfPurchase: new Date(data.dateOfPurchase),
+        dateOfPurchase: new Date(data.purchaseDate),
         purchaseValue: parseFloat(data.purchaseValue),
         depreciationRate: parseFloat(data.depreciationRate),
         usefulLife: parseInt(data.usefulLife),
         salvageValue: parseFloat(data.salvageValue),
         currentValue: parseFloat(data.purchaseValue),
-        lastDepreciationDate: new Date(data.dateOfPurchase),
+        lastDepreciationDate: new Date(data.purchaseDate),
         assetUsageStatus: 'IN_USE',
         remarks: data.remarks,
-        departmentId: data.departmentId,
-        branchId: data.branchId,
-        userId: user.id,
-        assetTypeId: data.assetTypeId,
+        department: {
+          connect: {
+            id: data.departmentId
+          }
+        },
+        branch: {
+          connect: {
+            id: data.branchId
+          }
+        },
+        user: {
+          connect: {
+            id: user.id
+          }
+        },
+        assetType: {
+          connect: {
+            id: data.assetTypeId
+          }
+        },
+        quantity: 1
       }
     });
+
+    console.log("asset created",asset);
 
     // Create activity log
     await prisma.activity.create({
@@ -45,9 +68,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json(asset);
   } catch (error) {
-    console.error('Error creating asset:', error);
+    if(error instanceof Prisma.PrismaClientKnownRequestError) {
+      console.error('Error creating asset:', error.message);
+    } else {
+      console.error('Error creating asset:', error);
+    }
     return NextResponse.json(
-      { error: 'Failed to create asset' },
+      { error: 'Failed to create asset', message: error },
       { status: 500 }
     );
   }
@@ -105,9 +132,13 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error('Error fetching assets:', error);
+    if(error instanceof Prisma.PrismaClientKnownRequestError) {
+      console.error('Error fetching assets:', error.message);
+    } else {
+      console.error('Error fetching assets:', error);
+    }
     return NextResponse.json(
-      { error: 'Failed to fetch assets' },
+      { error: 'Failed to fetch assets', message: error },
       { status: 500 }
     );
   }
