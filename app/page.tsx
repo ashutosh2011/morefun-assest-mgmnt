@@ -1,4 +1,5 @@
 import { ArrowRight, BarChart2, Shield, Zap } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -15,13 +16,15 @@ export default function Home() {
               Your centralized platform for managing company assets, processing scrap requests, and generating detailed reports.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-[#18BC9C] text-white font-medium hover:bg-[#18BC9C]/90 transition-colors">
-                Access Portal
-                <ArrowRight className="ml-2" size={20} />
-              </button>
-              <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg border-2 border-[#2C3E50] text-[#2C3E50] font-medium hover:bg-[#2C3E50] hover:text-white transition-colors">
+              <Link href="/login">
+                <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-[#18BC9C] text-white font-medium hover:bg-[#18BC9C]/90 transition-colors">
+                  Access Portal
+                  <ArrowRight className="ml-2" size={20} />
+                </button>
+              </Link>
+              {/* <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg border-2 border-[#2C3E50] text-[#2C3E50] font-medium hover:bg-[#2C3E50] hover:text-white transition-colors">
                 View Documentation
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -70,7 +73,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-semibold text-[#2C3E50] mb-2">
                 Reports & Analytics
-              </h3>
+              </h3> ̰
               <p className="text-gray-600">
                 Generate detailed reports on asset utilization, depreciation, and disposal status
               </p>
@@ -84,15 +87,18 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-[#2C3E50] rounded-2xl p-8 md:p-12 text-center">
             <h2 className="text-3xl font-bold text-white mb-4">
-              Access Your Dashboard
+              <Link href="/dashboard">
+                Access Your Dashboard
+              </Link>
             </h2>
             <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
               Log in to manage assets, submit requests, or review pending approvals
             </p>
-            <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-[#18BC9C] text-white font-medium hover:bg-[#18BC9C]/90 transition-colors">
-              Login to Portal
-              <ArrowRight className="ml-2" size={20} />
-            </button>
+            <Link href="/login">
+              <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-[#18BC9C] text-white font-medium hover:bg-[#18BC9C]/90 transition-colors" >
+                Login to Portal <ArrowRight className="ml-2" size={20} />
+              </button>
+            </Link>
           </div>
         </div>
       </div>

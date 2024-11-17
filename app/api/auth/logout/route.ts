@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function POST() {
   try {
     // Get the cookies instance
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     
     // Remove the token cookie
     cookieStore.delete('token');
