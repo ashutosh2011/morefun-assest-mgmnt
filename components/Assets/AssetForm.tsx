@@ -1,7 +1,72 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import { Calendar } from 'lucide-react';
+import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
+interface User {
+  id: string;
+  fullName: string;
+  email: string;
+}
+
+interface Branch {
+  id: string;
+  name: string;
+  code: string;
+}
+
+interface AssetType {
+  id: string;
+  assetTypeName: string;
+}
+
+interface AssetCategory {
+  id: string;
+  name: string;
+}
 
 export function AssetForm() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [assetTypes, setAssetTypes] = useState<AssetType[]>([]);
+  const [assetCategories, setAssetCategories] = useState<AssetCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [usersRes, branchesRes, typesRes, categoriesRes] = await Promise.all([
+          fetchWithAuth('/api/users'),
+          fetchWithAuth('/api/branches'),
+          fetchWithAuth('/api/asset-types'),
+          fetchWithAuth('/api/asset-categories'),
+        ]);
+
+        const [usersData, branchesData, typesData, categoriesData] = await Promise.all([
+          usersRes.json(),
+          branchesRes.json(),
+          typesRes.json(),
+          categoriesRes.json(),
+        ]);
+
+        setUsers(usersData);
+        setBranches(branchesData);
+        setAssetTypes(typesData);
+        setAssetCategories(categoriesData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <form className="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
       <div className="space-y-6">
@@ -28,10 +93,11 @@ export function AssetForm() {
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
             >
               <option value="">Select Type</option>
-              <option value="laptop">Laptop</option>
-              <option value="desktop">Desktop</option>
-              <option value="mobile">Mobile Device</option>
-              <option value="other">Other</option>
+              {assetTypes && assetTypes.length > 0 && assetTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.assetTypeName}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -70,8 +136,11 @@ export function AssetForm() {
             </label>
             <select className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]">
               <option value="">Select User</option>
-              <option value="john">John Doe</option>
-              <option value="jane">Jane Smith</option>
+              {users && users.length > 0 && users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.fullName}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -97,7 +166,11 @@ export function AssetForm() {
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
             >
               <option value="">Select Branch</option>
-              {/* Fetch and map branches */}
+              {branches && branches.length > 0 && branches.map((branch) => (
+                <option key={branch.id} value={branch.id}>
+                  {branch.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -111,8 +184,11 @@ export function AssetForm() {
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
             >
               <option value="">Select Category</option>
-              <option value="IT">IT Asset</option>
-              <option value="NON_IT">Non-IT Asset</option>
+              {assetCategories && assetCategories.length > 0 && assetCategories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
