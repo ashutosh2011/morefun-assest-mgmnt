@@ -161,7 +161,7 @@ model Approval {
 
 model ApprovalLevel {
   id           String    @id @default(uuid())
-  levelNumber  Int
+  levelNumber  Int       @unique
   description String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt

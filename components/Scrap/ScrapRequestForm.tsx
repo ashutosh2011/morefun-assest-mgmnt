@@ -1,9 +1,70 @@
-import React from 'react';
+'use client'
+import React, { useState, useEffect } from 'react';
 import { Upload } from 'lucide-react';
+import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 
 export function ScrapRequestForm() {
+  const [formData, setFormData] = useState({
+    assetId: '',
+    reason: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [assets, setAssets] = useState([]);
+
+  useEffect(() => {
+    const fetchAssets = async () => {
+      try {
+        const response = await fetchWithAuth('/api/assets');
+        if (!response.ok) {
+          throw new Error('Failed to fetch assets');
+        }
+        const data = await response.json();
+        console.log(data);
+        setAssets(data.assets);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load assets');
+      }
+    };
+
+    fetchAssets();
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/scrap-requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create scrap request');
+      }
+
+      // Handle successful response (e.g., show a success message or reset the form)
+      console.log('Scrap request created successfully');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <form className="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-[#2C3E50] mb-1">
@@ -11,21 +72,30 @@ export function ScrapRequestForm() {
             <span className="text-[#E74C3C]">*</span>
           </label>
           <select
+            name="assetId"
+            value={formData.assetId}
+            onChange={handleChange}
             required
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
           >
             <option value="">Choose an asset</option>
-            <option value="ast001">AST001 - MacBook Pro 16&quot;</option>
-            <option value="ast002">AST002 - Dell XPS Desktop</option>
+            {assets && assets.length > 0 && assets.map((asset: any) => (
+              <option key={asset.id} value={asset.id}>
+                {asset.assetName}
+              </option>
+            ))}
           </select>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-[#2C3E50] mb-1">
             Reason for Scrapping
-            <span className="text-[#E74C3C]">*</span>
+            <span className="text-[#E74C3E]">*</span>
           </label>
           <textarea
+            name="reason"
+            value={formData.reason}
+            onChange={handleChange}
             required
             rows={4}
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
@@ -33,48 +103,14 @@ export function ScrapRequestForm() {
           ></textarea>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-            Supporting Documents
-          </label>
-          <div className="mt-1 border-2 border-dashed border-gray-300 rounded-lg p-6">
-            <div className="flex flex-col items-center">
-              <Upload className="text-gray-400 mb-2" size={24} />
-              <p className="text-sm text-gray-600">
-                Drag and drop files here, or{" "}
-                <button type="button" className="text-[#18BC9C] hover:text-[#18BC9C]/80">
-                  browse
-                </button>
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                PDF, PNG, JPG up to 10MB each
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-blue-800 mb-2">Request Process</h3>
-          <ol className="list-decimal list-inside text-sm text-blue-700 space-y-1">
-            <li>Submit scrap request with required details</li>
-            <li>Manager reviews the request</li>
-            <li>If approved, asset will be marked for disposal</li>
-            <li>IT team handles the physical disposal process</li>
-          </ol>
-        </div>
+        {error && <p className="text-red-500">{error}</p>}
 
         <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            className="px-6 py-2 border border-gray-300 rounded-lg text-[#2C3E50] hover:bg-gray-50"
-          >
+          <button type="button" className="px-6 py-2 border border-gray-300 rounded-lg text-[#2C3E50] hover:bg-gray-50">
             Cancel
           </button>
-          <button
-            type="submit"
-            className="px-6 py-2 bg-[#18BC9C] text-white rounded-lg hover:bg-[#18BC9C]/90"
-          >
-            Submit Request
+          <button type="submit" className="px-6 py-2 bg-[#18BC9C] text-white rounded-lg hover:bg-[#18BC9C]/90" disabled={loading}>
+            {loading ? 'Submitting...' : 'Submit Request'}
           </button>
         </div>
       </div>

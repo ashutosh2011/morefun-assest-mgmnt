@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
+import { AssetDetailsModal } from './AssetDetailsModal';
+
 interface Asset {
   id: string;
   assetName: string;
@@ -25,6 +27,8 @@ export function AssetTable() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -44,6 +48,20 @@ export function AssetTable() {
 
     fetchAssets();
   }, []);
+
+  const handleViewAsset = async (assetId: string) => {
+    try {
+      const response = await fetchWithAuth(`/api/assets/${assetId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch asset details');
+      }
+      const assetData = await response.json();
+      setSelectedAsset(assetData);
+      setIsModalOpen(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    }
+  };
 
   if (loading) {
     return <div className="text-center py-4">Loading...</div>;
@@ -88,11 +106,14 @@ export function AssetTable() {
                   {new Date(asset.updatedAt).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 text-sm space-x-2">
-                  <button className="text-[#18BC9C] hover:text-[#18BC9C]/80">
+                  {/* <button className="text-[#18BC9C] hover:text-[#18BC9C]/80">
                     <Pencil size={18} />
-                  </button>
-                  <button className="text-[#E74C3C] hover:text-[#E74C3C]/80">
-                    <Trash2 size={18} />
+                  </button> */}
+                  <button 
+                    onClick={() => handleViewAsset(asset.id)}
+                    className="text-[#E74C3C] hover:text-[#E74C3C]/80"
+                  >
+                    <Eye size={18} />
                   </button>
                 </td>
               </tr>
@@ -100,6 +121,11 @@ export function AssetTable() {
           </tbody>
         </table>
       </div>
+      <AssetDetailsModal
+        asset={selectedAsset}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }
