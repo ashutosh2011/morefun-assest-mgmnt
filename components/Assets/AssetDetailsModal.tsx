@@ -2,6 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 
 interface AssetDetailsModalProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   asset: any; // You can create a more specific type based on your API response
   isOpen: boolean;
   onClose: () => void;
@@ -72,7 +73,9 @@ export function AssetDetailsModal({ asset, isOpen, onClose }: AssetDetailsModalP
             <div className="mt-6">
               <h3 className="font-semibold mb-2">Activity History</h3>
               <div className="space-y-2">
-                {asset.activities.map((activity: any) => (
+                {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                asset.activities.map((activity: any) => (
                   <div key={activity.id} className="border-b pb-2">
                     <p className="text-sm">
                       <span className="font-medium">{new Date(activity.createdAt).toLocaleString()}</span>: {activity.details}

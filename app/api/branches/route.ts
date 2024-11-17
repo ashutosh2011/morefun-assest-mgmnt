@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     })));
   } catch (error) {
     return NextResponse.json(
-      { error: 'Failed to fetch branches' },
+      { error: 'Failed to fetch branches', message: error },
       { status: 500 }
     );
   }

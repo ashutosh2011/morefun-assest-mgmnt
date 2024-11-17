@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { AssetDetailsModal } from './AssetDetailsModal';
 

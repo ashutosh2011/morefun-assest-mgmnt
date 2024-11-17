@@ -56,6 +56,8 @@ export async function PUT(
       }
     });
 
+    console.log('Approval created:', approval);
+
     let updatedScrapRequest;
 
     if (action === 'REJECTED') {

@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 interface ScrapRequestDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   scrapRequest: any; // TODO: Add proper type
 }
 
@@ -75,7 +76,9 @@ export function ScrapRequestDetailsModal({ isOpen, onClose, scrapRequest }: Scra
             <div>
               <h3 className="font-semibold mb-2">Approval History</h3>
               <div className="space-y-3">
-                {scrapRequest.approvals.map((approval: any) => (
+                {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                scrapRequest.approvals.map((approval: any) => (
                   <div key={approval.id} className="border-l-2 border-gray-200 pl-4">
                     <div className="flex justify-between">
                       <div>

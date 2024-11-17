@@ -45,6 +45,7 @@ export function RegisterForm() {
         setError(data.message || 'Registration failed');
       }
     } catch (err) {
+        console.log(err);
       setError('An error occurred. Please try again.');
     }
   };

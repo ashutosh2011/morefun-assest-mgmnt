@@ -30,6 +30,9 @@ export async function GET(
 
     return NextResponse.json(asset);
   } catch (error) {
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json(
+        { error: 'Failed to fetch asset', message: error },
+        { status: 500 }
+      );
   }
 } 

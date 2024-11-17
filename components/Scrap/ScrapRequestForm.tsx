@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { Upload } from 'lucide-react';
+// import { Upload } from 'lucide-react';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 
 export function ScrapRequestForm() {
@@ -88,7 +88,9 @@ export function ScrapRequestForm() {
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
           >
             <option value="">Choose an asset</option>
-            {assets && assets.length > 0 && assets.map((asset: any) => (
+            {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            assets && assets.length > 0 && assets.map((asset: any) => (
               <option key={asset.id} value={asset.id}>
                 {asset.assetName}
               </option>

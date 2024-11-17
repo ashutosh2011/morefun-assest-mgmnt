@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
-    const { email, password, fullName, phoneNumber, departmentId } = await request.json();
+    const { email, password, fullName } = await request.json();
 
     // Validate input
     if (!email || !password || !fullName) {
@@ -50,8 +50,8 @@ export async function POST(request: Request) {
         username: email,
         password: hashedPassword,
         fullName,
-        phoneNumber: "999999999",
-        departmentId: "920a9b4b-ca0c-409f-b986-7d1ea00444aa",
+        // phoneNumber: "999999999",
+        // departmentId: "920a9b4b-ca0c-409f-b986-7d1ea00444aa",
         roleId: defaultRole.id,
         isActive: true,
       },

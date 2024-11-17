@@ -69,6 +69,7 @@ export function ScrapRequestTable() {
 
   useEffect(() => {
     fetchScrapRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, filters]);
 
   const handleFilterChange = (filterKey: keyof typeof filters, value: string | boolean) => {

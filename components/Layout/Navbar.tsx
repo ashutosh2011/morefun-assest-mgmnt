@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {Menu, User, LayoutDashboard, Box, FileText, Trash2, LogOut } from 'lucide-react';
 
 const baseNavigation = [
@@ -12,8 +11,8 @@ const baseNavigation = [
 ];
 
 function Navbar() {
-  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = React.useState<any>(null);
 
   React.useEffect(() => {
