@@ -5,10 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {Menu, User, LayoutDashboard, Box, FileText, Trash2, LogOut } from 'lucide-react';
 
-const navigation = [
+const baseNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Assets', href: '/assets', icon: Box },
-  { name: 'Reports', href: '/reports', icon: FileText },
   { name: 'Scrap Requests', href: '/scrap-approval', icon: Trash2 },
 ];
 
@@ -43,6 +42,17 @@ function Navbar() {
       console.error('Logout error:', error);
     }
   };
+
+  // Compute navigation items based on user role
+  const navigation = React.useMemo(() => {
+    if (user?.role && user.role !== 'User') {
+      return [
+        ...baseNavigation,
+        { name: 'Reports', href: '/reports', icon: FileText },
+      ];
+    }
+    return baseNavigation;
+  }, [user?.role]);
 
   return (
     <nav className="bg-[#2C3E50] text-white">
