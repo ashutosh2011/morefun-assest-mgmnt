@@ -1,22 +1,120 @@
-import React from 'react';
-import { ReportCharts } from '@/components/Reports/ReportCharts';
-import { ReportFilters } from '@/components/Reports/ReportFilters';
-import { ReportTable } from '@/components/Reports/ReportTable';
+'use client';
 
-export default function Reports() {
+import { useEffect, useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { PieChart1, LineChart1 } from '@/components/Reports/Charts';
+import { Loader2 } from 'lucide-react';
+import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
+
+interface ReportsData {
+  assetDistribution: {
+    inUse: number;
+    scrapRequested: number;
+    scrapped: number;
+  };
+  monthlyTrends: {
+    newAssets: number;
+    newScrapRequests: number;
+    scrappedAssets: number;
+  };
+  categoryWise: Array<{
+    category: string;
+    _count: number;
+  }>;
+}
+
+export default function ReportsPage() {
+  const [data, setData] = useState<ReportsData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchReportsData();
+  }, []);
+
+  const fetchReportsData = async () => {
+    try {
+      const response = await fetchWithAuth('/api/reports');
+      const data = await response.json();
+      setData(data);
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#ECF0F1]">
-      
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-[#2C3E50]">Reports</h1>
-          <p className="text-gray-600">Generate and view asset management reports</p>
-        </div>
+    <div className="container mx-auto p-6 space-y-6">
+      <h1 className="text-2xl font-bold mb-6">Asset Reports</h1>
 
-        <ReportFilters />
-        <ReportCharts />
-        <ReportTable />
-      </main>
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Distribution Chart */}
+        <Card className="p-4">
+          <h2 className="text-lg font-semibold mb-4">Asset Distribution</h2>
+          <PieChart1 data={data?.assetDistribution || { inUse: 0, scrapRequested: 0, scrapped: 0 }} />
+        </Card>
+
+        {/* Monthly Trends Chart */}
+        <Card className="p-4">
+          <h2 className="text-lg font-semibold mb-4">Monthly Trends</h2>
+          <LineChart1 data={data?.monthlyTrends || { newAssets: 0, newScrapRequests: 0, scrappedAssets: 0 }} />
+        </Card>
+      </div>
+
+      {/* Summary Tables */}
+      <Card className="p-4">
+        <h2 className="text-lg font-semibold mb-4">Overall Summary</h2>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Metric</TableHead>
+              <TableHead>Count</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell>Total Assets In Use</TableCell>
+              <TableCell>{data?.assetDistribution?.inUse || 0}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Scrap Requested</TableCell>
+              <TableCell>{data?.assetDistribution?.scrapRequested || 0}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Scrapped Assets</TableCell>
+              <TableCell>{data?.assetDistribution?.scrapped || 0}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>New Assets This Month</TableCell>
+              <TableCell>{data?.monthlyTrends?.newAssets || 0}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>New Scrap Requests This Month</TableCell>
+              <TableCell>{data?.monthlyTrends?.newScrapRequests || 0}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Scrapped This Month</TableCell>
+              <TableCell>{data?.monthlyTrends?.scrappedAssets || 0}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </Card>
     </div>
   );
 }
