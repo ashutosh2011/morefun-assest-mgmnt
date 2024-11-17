@@ -15,7 +15,7 @@ export function ScrapRequestForm() {
   useEffect(() => {
     const fetchAssets = async () => {
       try {
-        const response = await fetchWithAuth('/api/assets');
+        const response = await fetchWithAuth('/api/assets?status=IN_USE');
         if (!response.ok) {
           throw new Error('Failed to fetch assets');
         }
@@ -51,13 +51,22 @@ export function ScrapRequestForm() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create scrap request');
+        if (response.status === 400) {
+          const data = await response.json();
+          if (data.error) {
+            setError(data.error);
+          } else {
+            setError('Failed to create scrap request');
+          }
+        } else {
+          throw new Error('Failed to create scrap request');
+        }
       }
 
       // Handle successful response (e.g., show a success message or reset the form)
       console.log('Scrap request created successfully');
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Failed to create scrap request');
     } finally {
       setLoading(false);
     }
