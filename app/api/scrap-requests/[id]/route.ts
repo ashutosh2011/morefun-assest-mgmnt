@@ -10,8 +10,8 @@ export async function PUT(
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id') || '';
+    const url = request.url;
+    const id = url.split('/').pop();
 
 
     const { action, comments } = await request.json();
@@ -130,8 +130,8 @@ export async function GET(
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id') || '';
+    const url = request.url;
+    const id = url.split('/').pop();
 
     const scrapRequest = await prisma.scrapRequest.findUnique({
       where: { id: id },

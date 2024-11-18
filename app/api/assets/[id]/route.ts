@@ -10,8 +10,8 @@ export async function GET(
     if (!user) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id') || '';
+    const url = request.url;
+    const id = url.split('/').pop();
       const asset = await prisma.asset.findUnique({
       where: { id },
       include: {
