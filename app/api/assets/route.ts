@@ -99,8 +99,8 @@ export async function GET(request: Request) {
       AND: [
         search ? {
           OR: [
-            { assetName: { contains: search, mode: 'insensitive' } },
-            { serialNumber: { contains: search, mode: 'insensitive' } },
+            { assetName: { contains: search } },
+            { serialNumber: { contains: search } },
           ],
         } : {},
         departmentId ? { departmentId } : {},
