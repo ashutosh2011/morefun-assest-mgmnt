@@ -51,7 +51,7 @@ export async function POST(request: Request) {
         password: hashedPassword,
         fullName,
         // phoneNumber: "999999999",
-        // departmentId: "920a9b4b-ca0c-409f-b986-7d1ea00444aa",
+        departmentId: "920a9b4b-ca0c-409f-b986-7d1ea00444aa",
         roleId: defaultRole.id,
         isActive: true,
       },

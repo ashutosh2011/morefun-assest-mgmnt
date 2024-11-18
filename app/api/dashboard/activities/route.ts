@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     }
 
     // For admin, show all activities. For users, show only their activities
-    const where = user.role === 'Admin' ? {} : { userId: user.id };
+    const where = user.role.roleName !== 'User' ? {} : { userId: user.id };
 
     const activities = await prisma.activity.findMany({
       where,

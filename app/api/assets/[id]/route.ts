@@ -1,19 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
 ) {
   try {
     const user = await auth(request);
     if (!user) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
-    await params; 
-    const asset = await prisma.asset.findUnique({
-      where: { id: params.id },
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id') || '';
+      const asset = await prisma.asset.findUnique({
+      where: { id },
       include: {
         assetType: true,
         department: true,

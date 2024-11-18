@@ -5,7 +5,7 @@ import { getUserFromToken } from '@/lib/auth';
 export async function GET(request: Request) {
   try {
     const user = await getUserFromToken(request);
-    if (!user || user.role !== 'Admin') {
+    if (!user || user.role.roleName === 'User') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

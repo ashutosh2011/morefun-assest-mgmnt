@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     if(error instanceof Prisma.PrismaClientKnownRequestError) {
         console.error('Error creating asset:', error.message);
       } else {
-        console.error('Error creating asset:', error.message);
+        console.error('Error creating asset:', error);
       }
     return NextResponse.json({ error: 'Failed to create scrap request', message: error }, { status: 500 });
   }

@@ -4,17 +4,18 @@ import { auth } from '@/lib/auth';
 import { logActivity, ActivityType } from '@/lib/utils/activity';
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: Request) {
   try {
     const user = await auth(request);
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id') || '';
+
 
     const { action, comments } = await request.json();
-    const scrapRequestId = params.id;
+    const scrapRequestId = id;
 
     // Fetch the scrap request with its current approval level
     const scrapRequest = await prisma.scrapRequest.findUnique({
@@ -122,17 +123,18 @@ export async function PUT(
 
 // GET endpoint for viewing scrap request details
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: Request
 ) {
   try {
     const user = await auth(request);
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id') || '';
 
     const scrapRequest = await prisma.scrapRequest.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         asset: {
           select: {

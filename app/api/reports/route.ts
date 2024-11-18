@@ -82,7 +82,7 @@ export async function GET(request: Request) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       console.error('Error fetching reports:', error.message);
     } else {
-      console.error('Error fetching reports:', error.message);
+      console.error('Error fetching reports:', error);
     }
     return NextResponse.json(
       { error: 'Failed to fetch reports' },
