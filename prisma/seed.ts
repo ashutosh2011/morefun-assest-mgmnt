@@ -82,7 +82,7 @@ async function main() {
     data: {
       username: 'admin',
       password: await bcrypt.hash('admin123', 10),
-      fullName: 'System Admin',
+      fullName: 'Rajesh Kumar',
       email: 'admin@example.com',
       phoneNumber: '1234567890',
       department: { connect: { id: itDepartment.id } },
@@ -94,11 +94,23 @@ async function main() {
     data: {
       username: 'user',
       password: await bcrypt.hash('user123', 10),
-      fullName: 'Regular User',
+      fullName: 'Priya Sharma',
       email: 'user@example.com',
       phoneNumber: '0987654321',
       department: { connect: { id: adminDepartment.id } },
       role: { connect: { id: userRole.id } }
+    }
+  })
+
+  const managerUser = await prisma.user.create({
+    data: {
+      username: 'manager',
+      password: await bcrypt.hash('manager123', 10),
+      fullName: 'Amit Patel',
+      email: 'manager@example.com',
+      phoneNumber: '9876543210',
+      department: { connect: { id: itDepartment.id } },
+      role: { connect: { id: managerRole.id } }
     }
   })
 
