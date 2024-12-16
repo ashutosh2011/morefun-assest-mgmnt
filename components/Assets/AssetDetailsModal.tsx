@@ -47,8 +47,31 @@ export function AssetDetailsModal({ asset, isOpen, onClose }: AssetDetailsModalP
             </div>
 
             <div>
+              <h3 className="font-semibold mb-2">Company Information</h3>
+              <div className="space-y-2">
+                <p><span className="font-medium">Company:</span> {asset.company}</p>
+                <p><span className="font-medium">Location:</span> {asset.location}</p>
+                <p><span className="font-medium">Asset Category:</span> {asset.assetCategory}</p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-2">Vendor Information</h3>
+              <div className="space-y-2">
+                <p><span className="font-medium">Vendor Name:</span> {asset.vendorName}</p>
+                <p><span className="font-medium">Bill Date:</span> {new Date(asset.billDate).toLocaleDateString()}</p>
+                <p><span className="font-medium">Bill Number:</span> {asset.billNumber}</p>
+              </div>
+            </div>
+
+            <div>
               <h3 className="font-semibold mb-2">Financial Details</h3>
               <div className="space-y-2">
+                <p><span className="font-medium">Opening Balance:</span> ${asset.openingBalance}</p>
+                <p><span className="font-medium">Addition:</span> ${asset.addition}</p>
+                <p><span className="font-medium">Depreciation:</span> ${asset.depreciation}</p>
+                <p><span className="font-medium">WDV:</span> ${asset.wdv}</p>
+                <p><span className="font-medium">Cumulative Depreciation:</span> ${asset.cumulativeDepreciation}</p>
                 <p><span className="font-medium">Purchase Date:</span> {new Date(asset.dateOfPurchase).toLocaleDateString()}</p>
                 <p><span className="font-medium">Purchase Value:</span> ${asset.purchaseValue}</p>
                 <p><span className="font-medium">Current Value:</span> ${asset.currentValue}</p>

@@ -16,13 +16,24 @@ model Asset {
   description       String?
   serialNumber      String?       @unique
   quantity         Int
+  company          String        // New
+  location         String        // New
+  assetCategory    String        // New
+  vendorName       String        // New
+  billDate         DateTime      // New
+  billNumber       String        // New
+  openingBalance   Float         // New
+  addition         Float         // New
+  depreciation     Float         // New
+  wdv              Float         // New (Written Down Value)
+  cumulativeDepreciation Float   // New
   dateOfPurchase   DateTime
   purchaseValue    Float
-  depreciationRate Float         // Annual depreciation rate (e.g., 0.2 for 20%)
-  usefulLife       Int           // In years
-  salvageValue     Float         // Expected value at end of useful life
-  currentValue     Float         // Calculated depreciated value
-  lastDepreciationDate DateTime  // Track last depreciation calculation
+  depreciationRate Float
+  usefulLife       Int
+  salvageValue     Float
+  currentValue     Float
+  lastDepreciationDate DateTime
   assetUsageStatus String        // IN_USE, IDLE, SCRAPPED
   remarks          String?
   createdAt        DateTime      @default(now())

@@ -27,6 +27,14 @@ interface AssetCategory {
 
 interface AssetFormData {
   name: string;
+  company: string;
+  location: string;
+  assetCategory: string;
+  vendorName: string;
+  billDate: string;
+  billNumber: string;
+  openingBalance: string;
+  addition: string;
   assetTypeId: string;
   serialNumber: string;
   purchaseDate: string;
@@ -34,7 +42,6 @@ interface AssetFormData {
   description: string;
   branchId: string;
   departmentId: string;
-  assetCategoryId: string;
   purchaseValue: string;
   depreciationRate: string;
   usefulLife: string;
@@ -66,6 +73,14 @@ export function AssetForm() {
     purchaseValue: '',
     depreciationRate: '',
     usefulLife: '',
+    company: '',
+    location: '',
+    assetCategory: '',
+    vendorName: '',
+    billDate: '',
+    billNumber: '',
+    openingBalance: '',
+    addition: '',
   });
 
   useEffect(() => {
@@ -139,6 +154,14 @@ export function AssetForm() {
         purchaseValue: '',
         depreciationRate: '',
         usefulLife: '',
+        company: '',
+        location: '',
+        assetCategory: '',
+        vendorName: '',
+        billDate: '',
+        billNumber: '',
+        openingBalance: '',
+        addition: '',
       });
 
       // You might want to add a success message or redirect here
@@ -371,6 +394,113 @@ export function AssetForm() {
               required
               min="1"
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+              Company
+              <span className="text-[#E74C3C]">*</span>
+            </label>
+            <input
+              type="text"
+              name="company"
+              value={formData.company}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+              Location
+              <span className="text-[#E74C3C]">*</span>
+            </label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+              Vendor Name
+              <span className="text-[#E74C3C]">*</span>
+            </label>
+            <input
+              type="text"
+              name="vendorName"
+              value={formData.vendorName}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+              Bill Date
+              <span className="text-[#E74C3C]">*</span>
+            </label>
+            <input
+              type="date"
+              name="billDate"
+              value={formData.billDate}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+              Bill Number
+              <span className="text-[#E74C3C]">*</span>
+            </label>
+            <input
+              type="text"
+              name="billNumber"
+              value={formData.billNumber}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+              Opening Balance
+              <span className="text-[#E74C3C]">*</span>
+            </label>
+            <input
+              type="number"
+              name="openingBalance"
+              value={formData.openingBalance}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+              Addition
+              <span className="text-[#E74C3C]">*</span>
+            </label>
+            <input
+              type="number"
+              name="addition"
+              value={formData.addition}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
             />
           </div>
         </div>

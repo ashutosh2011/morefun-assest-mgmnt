@@ -149,10 +149,55 @@ async function main() {
       currentValue: 1800.00,
       lastDepreciationDate: new Date('2024-03-01'),
       assetUsageStatus: 'IN_USE',
+      remarks: 'New laptop for development team',
+      company: 'Apple Inc.',
+      location: 'Development Office',
+      assetCategory: 'Electronics',
+      vendorName: 'Apple Store',
+      billDate: new Date('2024-01-01'),
+      billNumber: 'BILL2024001',
+      openingBalance: 2000.00,
+      addition: 0.00,
+      depreciation: 200.00,
+      wdv: 1800.00,
+      cumulativeDepreciation: 200.00,
       department: { connect: { id: itDepartment.id } },
       branch: { connect: { id: mainBranch.id } },
       user: { connect: { id: adminUser.id } },
       assetType: { connect: { id: laptopType.id } }
+    }
+  })
+
+  const desktop = await prisma.asset.create({
+    data: {
+      assetName: 'Dell Workstation',
+      description: 'Dell Precision Tower',
+      serialNumber: 'DWS2024001',
+      quantity: 1,
+      dateOfPurchase: new Date('2024-01-15'),
+      purchaseValue: 1500.00,
+      depreciationRate: 0.2,
+      usefulLife: 5,
+      salvageValue: 300.00,
+      currentValue: 1400.00,
+      lastDepreciationDate: new Date('2024-03-01'),
+      assetUsageStatus: 'IN_USE',
+      remarks: 'High-performance workstation',
+      company: 'Dell Technologies',
+      location: 'Admin Office',
+      assetCategory: 'Electronics',
+      vendorName: 'Dell Enterprise Sales',
+      billDate: new Date('2024-01-15'),
+      billNumber: 'BILL2024002',
+      openingBalance: 1500.00,
+      addition: 0.00,
+      depreciation: 100.00,
+      wdv: 1400.00,
+      cumulativeDepreciation: 100.00,
+      department: { connect: { id: adminDepartment.id } },
+      branch: { connect: { id: mainBranch.id } },
+      user: { connect: { id: regularUser.id } },
+      assetType: { connect: { id: desktopType.id } }
     }
   })
 

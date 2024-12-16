@@ -50,7 +50,18 @@ export async function POST(request: Request) {
             id: data.assetTypeId
           }
         },
-        quantity: 1
+        quantity: 1,
+        company: data.company,
+        location: data.location,
+        assetCategory: data.assetCategory,
+        vendorName: data.vendorName,
+        billDate: new Date(data.billDate),
+        billNumber: data.billNumber,
+        openingBalance: parseFloat(data.openingBalance),
+        addition: parseFloat(data.addition),
+        depreciation: 0,
+        wdv: parseFloat(data.openingBalance),
+        cumulativeDepreciation: 0,
       }
     });
 
