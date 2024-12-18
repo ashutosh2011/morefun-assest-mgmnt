@@ -24,15 +24,15 @@ export function AssetDetailsModal({ asset, isOpen, onClose }: AssetDetailsModalP
           
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <h3 className="font-semibold mb-2">Basic Information</h3>
+              <h3 className="font-semibold mb-2">Asset Information</h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Asset ID:</span> {asset.id}</p>
+                <p><span className="font-medium">System ID:</span> {asset.id}</p>
+                <p><span className="font-medium">Custom ID:</span> {asset.customAssetId || 'N/A'}</p>
                 <p><span className="font-medium">Name:</span> {asset.assetName}</p>
-                <p><span className="font-medium">Description:</span> {asset.description || 'N/A'}</p>
-                <p><span className="font-medium">Serial Number:</span> {asset.serialNumber}</p>
-                <p><span className="font-medium">Type:</span> {asset.assetType.assetTypeName}</p>
-                <p><span className="font-medium">Status:</span> {asset.assetUsageStatus}</p>
-                <p><span className="font-medium">Quantity:</span> {asset.quantity}</p>
+                <p><span className="font-medium">Category:</span> {asset.assetType.assetTypeName}</p>
+                <p><span className="font-medium">Location:</span> {asset.branch.location}</p>
+                <p><span className="font-medium">Department:</span> {asset.department.departmentName}</p>
+                <p><span className="font-medium">Depreciation Rate:</span> {asset.assetType.depreciationPercentage}%</p>
               </div>
             </div>
             

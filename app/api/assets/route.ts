@@ -11,81 +11,75 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
-    data.salvageValue = 0;
-    data.remarks = data.remarks || "";
 
-    console.log("received data",data);
-    
+    console.log(data);
+    data.branchId = data.location
+    data.location = await prisma.branch.findUnique({where: {id: data.branchId}})
+    data.location = data.location.branchName
+    // Input validation
+    if (!data.name || !data.assetTypeId || !data.branchId) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Calculate WDV and cumulative depreciation based on opening balance and addition
+    const openingBalance = parseFloat(data.openingBalance) || 0;
+    const addition = parseFloat(data.addition) || 0;
+    const wdv = openingBalance + addition;
+
     const asset = await prisma.asset.create({
       data: {
+        customAssetId: data.customAssetId,
         assetName: data.name,
         description: data.description,
-        serialNumber: data.serialNumber,
-        dateOfPurchase: new Date(data.purchaseDate),
-        purchaseValue: parseFloat(data.purchaseValue),
-        depreciationRate: parseFloat(data.depreciationRate),
-        usefulLife: parseInt(data.usefulLife),
-        salvageValue: parseFloat(data.salvageValue),
-        currentValue: parseFloat(data.purchaseValue),
-        lastDepreciationDate: new Date(data.purchaseDate),
-        assetUsageStatus: 'IN_USE',
-        remarks: data.remarks,
-        department: {
-          connect: {
-            id: data.departmentId
-          }
-        },
-        branch: {
-          connect: {
-            id: data.branchId
-          }
-        },
-        user: {
-          connect: {
-            id: user.id
-          }
-        },
-        assetType: {
-          connect: {
-            id: data.assetTypeId
-          }
-        },
-        quantity: 1,
+        assetUsage: data.assetUsage,
         company: data.company,
         location: data.location,
         assetCategory: data.assetCategory,
         vendorName: data.vendorName,
-        billDate: new Date(data.billDate),
+        billDate: data.billDate ? new Date(data.billDate) : null,
         billNumber: data.billNumber,
-        openingBalance: parseFloat(data.openingBalance),
-        addition: parseFloat(data.addition),
+        openingBalance: openingBalance,
+        addition: addition,
         depreciation: 0,
-        wdv: parseFloat(data.openingBalance),
+        wdv: wdv,
         cumulativeDepreciation: 0,
-      }
-    });
-
-    console.log("asset created",asset);
-
-    // Create activity log
-    await prisma.activity.create({
-      data: {
-        action: 'ASSET_CREATED',
-        details: `Created new asset: ${asset.assetName}`,
-        userId: user.id,
-        assetId: asset.id,
+        remarks: data.remarks,
+        assetUsageStatus: 'IN_USE', // Set default status
+        department: data.departmentId ? {
+          connect: { id: data.departmentId }
+        } : undefined,
+        branch: {
+          connect: { id: data.branchId }
+        },
+        user: data.assignedUserId ? {
+          connect: { id: data.assignedUserId }
+        } : undefined,
+        assetType: {
+          connect: { id: data.assetTypeId }
+        },
+        serialNumber: data.serialNumber,
+        // purchaseValue: parseFloat(data.purchaseValue) || 0,
+        // depreciationRate: parseFloat(data.depreciationRate) || 0,
+        // usefulLife: parseInt(data.usefulLife) || 0,
+        quantity: 1,
       }
     });
 
     return NextResponse.json(asset);
   } catch (error) {
-    if(error instanceof Prisma.PrismaClientKnownRequestError) {
-      console.error('Error creating asset:', error.message);
-    } else {
-      console.error('Error creating asset:', error);
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      console.error('Prisma error creating asset:', error.message);
+      return NextResponse.json(
+        { error: 'Database error while creating asset' },
+        { status: 400 }
+      );
     }
+    console.error('Error creating asset:', error);
     return NextResponse.json(
-      { error: 'Failed to create asset', message: error },
+      { error: 'Failed to create asset' },
       { status: 500 }
     );
   }
@@ -99,9 +93,9 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const search = searchParams.get('search') || '';
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10')));
+    const search = searchParams.get('search')?.trim() || '';
     const departmentId = searchParams.get('departmentId');
     const assetTypeId = searchParams.get('assetTypeId');
     const status = searchParams.get('status');

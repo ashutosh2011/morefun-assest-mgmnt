@@ -1,17 +1,22 @@
 -- CreateTable
 CREATE TABLE "assets" (
     "id" TEXT NOT NULL,
+    "customAssetId" TEXT,
     "assetName" TEXT NOT NULL,
     "description" TEXT,
-    "serialNumber" TEXT,
     "quantity" INTEGER NOT NULL,
-    "dateOfPurchase" TIMESTAMP(3) NOT NULL,
-    "purchaseValue" DOUBLE PRECISION NOT NULL,
-    "depreciationRate" DOUBLE PRECISION NOT NULL,
-    "usefulLife" INTEGER NOT NULL,
-    "salvageValue" DOUBLE PRECISION NOT NULL,
-    "currentValue" DOUBLE PRECISION NOT NULL,
-    "lastDepreciationDate" TIMESTAMP(3) NOT NULL,
+    "company" TEXT NOT NULL,
+    "location" TEXT NOT NULL,
+    "assetCategory" TEXT NOT NULL,
+    "vendorName" TEXT NOT NULL,
+    "billDate" TIMESTAMP(3) NOT NULL,
+    "billNumber" TEXT NOT NULL,
+    "openingBalance" DOUBLE PRECISION NOT NULL,
+    "addition" DOUBLE PRECISION NOT NULL,
+    "depreciation" DOUBLE PRECISION NOT NULL,
+    "wdv" DOUBLE PRECISION NOT NULL,
+    "cumulativeDepreciation" DOUBLE PRECISION NOT NULL,
+    "assetUsage" TEXT,
     "assetUsageStatus" TEXT NOT NULL,
     "remarks" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -79,6 +84,7 @@ CREATE TABLE "asset_types" (
     "id" TEXT NOT NULL,
     "assetTypeName" TEXT NOT NULL,
     "description" TEXT,
+    "depreciationPercentage" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -142,9 +148,6 @@ CREATE TABLE "activities" (
 
     CONSTRAINT "activities_pkey" PRIMARY KEY ("id")
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "assets_serialNumber_key" ON "assets"("serialNumber");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "branches_branchName_key" ON "branches"("branchName");

@@ -26,6 +26,7 @@ interface AssetCategory {
 }
 
 interface AssetFormData {
+  customAssetId: string;
   name: string;
   company: string;
   location: string;
@@ -35,16 +36,14 @@ interface AssetFormData {
   billNumber: string;
   openingBalance: string;
   addition: string;
-  assetTypeId: string;
-  serialNumber: string;
-  purchaseDate: string;
-  assignedUserId: string;
+  assetUsage: string;
   description: string;
-  branchId: string;
   departmentId: string;
-  purchaseValue: string;
-  depreciationRate: string;
-  usefulLife: string;
+  remarks: string;
+  assetTypeId: string;
+  branchId: string;
+  assignedUserId: string;
+  assetUsageStatus: string;
 }
 
 interface Department {
@@ -61,18 +60,11 @@ export function AssetForm() {
   const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState<AssetFormData>({
+    customAssetId: '',
     name: '',
-    assetTypeId: '',
-    serialNumber: '',
-    purchaseDate: '',
-    assignedUserId: '',
     description: '',
-    branchId: '',
     departmentId: '',
-    assetCategoryId: '',
-    purchaseValue: '',
-    depreciationRate: '',
-    usefulLife: '',
+    assetUsage: '',
     company: '',
     location: '',
     assetCategory: '',
@@ -81,6 +73,11 @@ export function AssetForm() {
     billNumber: '',
     openingBalance: '',
     addition: '',
+    remarks: '',
+    assetTypeId: '',
+    branchId: '',
+    assignedUserId: '',
+    assetUsageStatus: '',
   });
 
   useEffect(() => {
@@ -142,18 +139,11 @@ export function AssetForm() {
 
       // Reset form after successful submission
       setFormData({
+        customAssetId: '',
         name: '',
-        assetTypeId: '',
-        serialNumber: '',
-        purchaseDate: '',
-        assignedUserId: '',
         description: '',
-        branchId: '',
         departmentId: '',
-        assetCategoryId: '',
-        purchaseValue: '',
-        depreciationRate: '',
-        usefulLife: '',
+        assetUsage: '',
         company: '',
         location: '',
         assetCategory: '',
@@ -162,6 +152,11 @@ export function AssetForm() {
         billNumber: '',
         openingBalance: '',
         addition: '',
+        remarks: '',
+        assetTypeId: '',
+        branchId: '',
+        assignedUserId: '',
+        assetUsageStatus: ''
       });
 
       // You might want to add a success message or redirect here
@@ -176,345 +171,300 @@ export function AssetForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
-      <div className="space-y-6">
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 max-w-5xl mx-auto">
+      <div className="space-y-8">
+        {/* Basic Information Section */}
         <div>
-          <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-            Asset Name
-            <span className="text-[#E74C3C]">*</span>
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Asset Type
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <select
-              name="assetTypeId"
-              value={formData.assetTypeId}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
-            >
-              <option value="">Select Type</option>
-              {assetTypes && assetTypes.length > 0 && assetTypes.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.assetTypeName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Serial Number
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <input
-              type="text"
-              name="serialNumber"
-              value={formData.serialNumber}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Purchase Date
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <div className="relative">
+          <h3 className="text-lg font-semibold text-[#2C3E50] mb-4">Basic Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Custom Asset ID
+              </label>
               <input
-                type="date"
-                name="purchaseDate"
-                value={formData.purchaseDate}
+                type="text"
+                name="customAssetId"
+                value={formData.customAssetId}
+                onChange={handleChange}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Asset Name <span className="text-[#E74C3C]">*</span>
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
               />
-              <Calendar className="absolute right-3 top-2.5 text-gray-400" size={20} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Company <span className="text-[#E74C3C]">*</span>
+              </label>
+              <input
+                type="text"
+                name="company"
+                value={formData.company}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              />
             </div>
           </div>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Assigned User
-            </label>
-            <select
-              name="assignedUserId"
-              value={formData.assignedUserId}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
-            >
-              <option value="">Select User</option>
-              {users && users.length > 0 && users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.fullName}
-                </option>
-              ))}
-            </select>
+        {/* Classification Section */}
+        <div>
+          <h3 className="text-lg font-semibold text-[#2C3E50] mb-4">Classification</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Asset Category <span className="text-[#E74C3C]">*</span>
+              </label>
+              <select
+                name="assetTypeId"
+                value={formData.assetTypeId}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              >
+                <option value="">Select Category</option>
+                {assetTypes?.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.assetTypeName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Department <span className="text-[#E74C3C]">*</span>
+              </label>
+              <select
+                name="departmentId"
+                value={formData.departmentId}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              >
+                <option value="">Select Department</option>
+                {departments?.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.departmentName}
+                  </option>
+                ))}
+              </select>
+            </div> */}
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Location <span className="text-[#E74C3C]">*</span>
+              </label>
+              <select
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              >
+                <option value="">Select Location</option>
+                {branches?.map((branch) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Purchase Information Section */}
+        <div>
+          <h3 className="text-lg font-semibold text-[#2C3E50] mb-4">Purchase Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Purchase Date <span className="text-[#E74C3C]">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="date"
+                  name="billDate"
+                  value={formData.billDate}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+                />
+                <Calendar className="absolute right-3 top-2.5 text-gray-400" size={20} />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Bill Number <span className="text-[#E74C3C]">*</span>
+              </label>
+              <input
+                type="text"
+                name="billNumber"
+                value={formData.billNumber}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Vendor Name <span className="text-[#E74C3C]">*</span>
+              </label>
+              <input
+                type="text"
+                name="vendorName"
+                value={formData.vendorName}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Opening Balance <span className="text-[#E74C3C]">*</span>
+              </label>
+              <input
+                type="number"
+                name="openingBalance"
+                value={formData.openingBalance}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Addition <span className="text-[#E74C3C]">*</span>
+              </label>
+              <input
+                type="number"
+                name="addition"
+                value={formData.addition}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              />
+            </div>  
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-            Description
-          </label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            rows={4}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
-          ></textarea>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <h3 className="text-lg font-semibold text-[#2C3E50] mb-4">Useage Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Branch
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <select
-              name="branchId"
-              value={formData.branchId}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
-            >
-              <option value="">Select Branch</option>
-              {branches && branches.length > 0 && branches.map((branch) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Department
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <select
-              name="departmentId"
-              value={formData.departmentId}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
-            >
-              <option value="">Select Department</option>
-              {departments && departments.length > 0 && departments.map((department) => (
-                <option key={department.id} value={department.id}>
-                  {department.departmentName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Asset Category
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <select
-              name="assetCategoryId"
-              value={formData.assetCategoryId}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
-            >
-              <option value="">Select Category</option>
-              {assetCategories && assetCategories.length > 0 && assetCategories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Asset Usage <span className="text-[#E74C3C]">*</span>
+              </label>
+              <input
+                type="text"
+                name="assetUsage"
+                value={formData.assetUsage}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">Assigned User</label>
+              <select
+                name="assignedUserId"
+                value={formData.assignedUserId}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              >
+                <option value="">Select User</option>
+                {users?.map((user) => (
+                  <option key={user.id} value={user.id}>{user.fullName}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">Use Department</label>
+              <select
+                name="departmentId"
+                value={formData.departmentId}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              >
+                <option value="">Select Department</option>
+                {departments?.map((dept) => (
+                  <option key={dept.id} value={dept.id}>{dept.departmentName}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">Status</label>
+              <select
+                name="assetUsageStatus"
+                value={formData.assetUsageStatus}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              >
+                <option value="">Select Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Purchase Value
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <input
-              type="number"
-              name="purchaseValue"
-              value={formData.purchaseValue}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Depreciation Rate (%)
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <input
-              type="number"
-              name="depreciationRate"
-              value={formData.depreciationRate}
-              onChange={handleChange}
-              required
-              min="0"
-              max="100"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Useful Life (Years)
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <input
-              type="number"
-              name="usefulLife"
-              value={formData.usefulLife}
-              onChange={handleChange}
-              required
-              min="1"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C] text-[#2C3E50]"
-            />
+        {/* Additional Information Section */}
+        <div>
+          <h3 className="text-lg font-semibold text-[#2C3E50] mb-4">Additional Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Description
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows={4}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2C3E50] mb-1">
+                Remarks
+              </label>
+              <textarea
+                name="remarks"
+                value={formData.remarks}
+                onChange={handleChange}
+                rows={4}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Company
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <input
-              type="text"
-              name="company"
-              value={formData.company}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Location
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Vendor Name
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <input
-              type="text"
-              name="vendorName"
-              value={formData.vendorName}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Bill Date
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <input
-              type="date"
-              name="billDate"
-              value={formData.billDate}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Bill Number
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <input
-              type="text"
-              name="billNumber"
-              value={formData.billNumber}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Opening Balance
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <input
-              type="number"
-              name="openingBalance"
-              value={formData.openingBalance}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50] mb-1">
-              Addition
-              <span className="text-[#E74C3C]">*</span>
-            </label>
-            <input
-              type="number"
-              name="addition"
-              value={formData.addition}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#18BC9C]"
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-end space-x-4">
+        {/* Form Actions */}
+        <div className="flex justify-end space-x-4 pt-6">
           <button
             type="button"
-            className="px-6 py-2 border border-gray-300 rounded-lg text-[#2C3E50] hover:bg-gray-50"
+            className="px-6 py-2 border border-gray-300 rounded-lg text-[#2C3E50] hover:bg-gray-50 transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-[#18BC9C] text-white rounded-lg hover:bg-[#18BC9C]/90"
+            className="px-6 py-2 bg-[#18BC9C] text-white rounded-lg hover:bg-[#18BC9C]/90 transition-colors"
           >
             Create Asset
           </button>
