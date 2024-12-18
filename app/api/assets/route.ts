@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
+import { updateAssetDepreciation } from '@/lib/utils/depreciation';
 
 export async function POST(request: Request) {
   try {
@@ -65,10 +66,16 @@ export async function POST(request: Request) {
         // depreciationRate: parseFloat(data.depreciationRate) || 0,
         // usefulLife: parseInt(data.usefulLife) || 0,
         quantity: 1,
+      },
+      include: {
+        assetType: true
       }
     });
 
-    return NextResponse.json(asset);
+    // Calculate and update depreciation values
+    const updatedAsset = await updateAssetDepreciation(prisma, asset);
+
+    return NextResponse.json(updatedAsset);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       console.error('Prisma error creating asset:', error.message);
@@ -105,7 +112,6 @@ export async function GET(request: Request) {
         search ? {
           OR: [
             { assetName: { contains: search } },
-            { serialNumber: { contains: search } },
           ],
         } : {},
         departmentId ? { departmentId } : {},

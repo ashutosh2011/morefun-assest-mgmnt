@@ -6,6 +6,7 @@ import { AssetDetailsModal } from './AssetDetailsModal';
 interface Asset {
   id: string;
   assetName: string;
+  customAssetId: string,
   assetType: {
     assetTypeName: string;
   };
@@ -89,7 +90,7 @@ export function AssetTable() {
           <tbody className="divide-y divide-gray-200">
             {assets.map((asset, index) => (
               <tr key={asset.id} className={index % 2 === 0 ? 'bg-white' : 'bg-[#F8F9F9]'}>
-                <td className="px-6 py-4 text-sm text-[#2C3E50]">{asset.id}</td>
+                <td className="px-6 py-4 text-sm text-[#2C3E50]">{asset.customAssetId}</td>
                 <td className="px-6 py-4 text-sm text-[#2C3E50] font-medium">{asset.assetName}</td>
                 <td className="px-6 py-4 text-sm text-[#2C3E50]">{asset.assetType.assetTypeName}</td>
                 <td className="px-6 py-4 text-sm">
