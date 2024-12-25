@@ -29,10 +29,10 @@ export function AssetDetailsModal({ asset, isOpen, onClose }: AssetDetailsModalP
                 <p><span className="font-medium">System ID:</span> {asset.id}</p>
                 <p><span className="font-medium">Custom ID:</span> {asset.customAssetId || 'N/A'}</p>
                 <p><span className="font-medium">Name:</span> {asset.assetName}</p>
+                <p><span className="font-medium">Description:</span> {asset.description}</p>
                 <p><span className="font-medium">Category:</span> {asset.assetType.assetTypeName}</p>
                 <p><span className="font-medium">Location:</span> {asset.branch.location}</p>
                 <p><span className="font-medium">Department:</span> {asset.department.departmentName}</p>
-                <p><span className="font-medium">Depreciation Rate:</span> {asset.assetType.depreciationPercentage}%</p>
               </div>
             </div>
             
@@ -43,6 +43,8 @@ export function AssetDetailsModal({ asset, isOpen, onClose }: AssetDetailsModalP
                 <p><span className="font-medium">Branch:</span> {asset.branch?.branchName}</p>
                 <p><span className="font-medium">Assigned To:</span> {asset.user?.fullName}</p>
                 <p><span className="font-medium">User Email:</span> {asset.user?.email}</p>
+                <p><span className="font-medium">Asset Status:</span> {asset.assetUsageStatus}</p>
+                <p><span className="font-medium">Asset Usage:</span> {asset.assetUsage}</p>
               </div>
             </div>
 
@@ -67,17 +69,12 @@ export function AssetDetailsModal({ asset, isOpen, onClose }: AssetDetailsModalP
             <div>
               <h3 className="font-semibold mb-2">Financial Details</h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Opening Balance:</span> Rs.{asset.openingBalance}</p>
-                <p><span className="font-medium">Addition:</span> Rs.{asset.addition}</p>
-                <p><span className="font-medium">Depreciation:</span> Rs.{asset.depreciation}</p>
-                <p><span className="font-medium">WDV:</span> Rs.{asset.wdv}</p>
-                <p><span className="font-medium">Cumulative Depreciation:</span> Rs.{asset.cumulativeDepreciation}</p>
-                <p><span className="font-medium">Purchase Date:</span> {new Date(asset.dateOfPurchase).toLocaleDateString()}</p>
-                <p><span className="font-medium">Purchase Value:</span> Rs.{asset.purchaseValue}</p>
-                <p><span className="font-medium">Current Value:</span> Rs.{asset.currentValue}</p>
-                <p><span className="font-medium">Depreciation Rate:</span> {asset.depreciationRate}%</p>
-                <p><span className="font-medium">Useful Life:</span> {asset.usefulLife} years</p>
-                <p><span className="font-medium">Salvage Value:</span> Rs.{asset.salvageValue}</p>
+                <p><span className="font-medium">Opening Balance:</span> Rs.{asset.openingBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p><span className="font-medium">Addition:</span> Rs.{asset.addition.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p><span className="font-medium">Depreciation Rate:</span> {asset.assetType.depreciationPercentage.toFixed(2)}%</p>
+                <p><span className="font-medium">Depreciation:</span> Rs.{asset.depreciation.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p><span className="font-medium">Written Down Value:</span> Rs.{asset.wdv.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p><span className="font-medium">Cumulative Depreciation:</span> Rs.{asset.cumulativeDepreciation.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
             </div>
 
@@ -87,6 +84,9 @@ export function AssetDetailsModal({ asset, isOpen, onClose }: AssetDetailsModalP
                 <p><span className="font-medium">Created:</span> {new Date(asset.createdAt).toLocaleString()}</p>
                 <p><span className="font-medium">Last Updated:</span> {new Date(asset.updatedAt).toLocaleString()}</p>
                 <p><span className="font-medium">Last Depreciation Date:</span> {new Date(asset.lastDepreciationDate).toLocaleDateString()}</p>
+                {asset.assetUsageStatus === 'SCRAPPED' && asset.scrappedAtDate && (
+                  <p><span className="font-medium">Scrapped At:</span> {new Date(asset.scrappedAtDate).toLocaleDateString()}</p>
+                )}
                 <p><span className="font-medium">Remarks:</span> {asset.remarks || 'N/A'}</p>
               </div>
             </div>

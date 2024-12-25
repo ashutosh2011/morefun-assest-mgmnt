@@ -48,7 +48,8 @@ export async function POST(request: Request) {
         wdv: wdv,
         cumulativeDepreciation: 0,
         remarks: data.remarks,
-        assetUsageStatus: 'IN_USE', // Set default status
+        assetUsageStatus: 'IN_USE',
+        scrappedAtDate: null,
         department: data.departmentId ? {
           connect: { id: data.departmentId }
         } : undefined,

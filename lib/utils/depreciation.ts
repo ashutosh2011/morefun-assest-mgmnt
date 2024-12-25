@@ -10,19 +10,23 @@ interface DepreciationResult {
 export function calculateDepreciation(
   asset: Asset & { assetType: AssetType }
 ): DepreciationResult {
+  // If asset is scrapped, calculate depreciation until scrap date
+  const calculationDate = asset.assetUsageStatus === 'SCRAPPED' 
+    ? asset.scrappedAtDate || new Date()
+    : new Date();
+
   // Get the initial values
   const totalValue = asset.openingBalance + asset.addition;
-  const depreciationRate = asset.assetType.depreciationPercentage;
+  const depreciationRate = asset.assetType.depreciationPercentage / 100;
   
-  // Calculate days since purchase or last depreciation
-  const today = new Date();
+  // Calculate days in use
   const billDate = new Date(asset.billDate);
-  const daysSincePurchase = Math.floor(
-    (today.getTime() - billDate.getTime()) / (1000 * 60 * 60 * 24)
+  const daysInUse = Math.floor(
+    (calculationDate.getTime() - billDate.getTime()) / (1000 * 60 * 60 * 24)
   );
 
   // If asset is less than a day old, return initial values
-  if (daysSincePurchase < 1) {
+  if (daysInUse < 1) {
     return {
       currentValue: totalValue,
       depreciationAmount: 0,
@@ -31,34 +35,22 @@ export function calculateDepreciation(
     };
   }
 
-  // Calculate depreciation based on Indian accounting standards
-  // Using Written Down Value (WDV) method
-  const yearsElapsed = daysSincePurchase / 365;
+  // Calculate depreciation
+  const depreciation = totalValue * depreciationRate * (daysInUse / 365);
   
-  // Calculate depreciation amount for the period
-  let wdv = totalValue;
-  let totalDepreciation = 0;
-  
-  // Calculate year-wise depreciation
-  for (let year = 0; year < Math.ceil(yearsElapsed); year++) {
-    const yearFraction = year + 1 > yearsElapsed ? yearsElapsed % 1 : 1;
-    const yearlyDepreciation = wdv * (depreciationRate / 100) * yearFraction;
-    totalDepreciation += yearlyDepreciation;
-    wdv -= yearlyDepreciation;
-  }
+  // Calculate WDV
+  const wdv = totalValue - depreciation;
 
   // Ensure WDV doesn't go below 5% of original value (as per Indian accounting practices)
   const minimumValue = totalValue * 0.05;
-  if (wdv < minimumValue) {
-    wdv = minimumValue;
-    totalDepreciation = totalValue - minimumValue;
-  }
+  const finalWdv = Math.max(wdv, minimumValue);
+  const finalDepreciation = totalValue - finalWdv;
 
   return {
-    currentValue: wdv,
-    depreciationAmount: totalDepreciation - (asset.depreciation || 0), // New depreciation for this period
-    cumulativeDepreciation: totalDepreciation,
-    wdv: wdv
+    currentValue: finalWdv,
+    depreciationAmount: finalDepreciation - (asset.depreciation || 0), // New depreciation for this period
+    cumulativeDepreciation: finalDepreciation,
+    wdv: finalWdv
   };
 }
 
@@ -67,10 +59,6 @@ export async function updateAssetDepreciation(
   prisma: any,
   asset: Asset & { assetType: AssetType }
 ) {
-  if (asset.assetUsageStatus === 'SCRAPPED') {
-    return null;
-  }
-
   const depreciation = calculateDepreciation(asset);
 
   return await prisma.asset.update({

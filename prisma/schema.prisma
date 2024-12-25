@@ -29,7 +29,7 @@ model Asset {
   cumulativeDepreciation Float   // Calculated field
   assetUsage       String?       // New field
   assetUsageStatus String       // IN_USE, IDLE, SCRAPPED
-  
+  scrappedAtDate   DateTime?    // New field - nullable since not all assets are scrapped
   remarks          String?
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
