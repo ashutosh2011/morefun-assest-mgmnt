@@ -67,17 +67,17 @@ export function AssetDetailsModal({ asset, isOpen, onClose }: AssetDetailsModalP
             <div>
               <h3 className="font-semibold mb-2">Financial Details</h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Opening Balance:</span> ${asset.openingBalance}</p>
-                <p><span className="font-medium">Addition:</span> ${asset.addition}</p>
-                <p><span className="font-medium">Depreciation:</span> ${asset.depreciation}</p>
-                <p><span className="font-medium">WDV:</span> ${asset.wdv}</p>
-                <p><span className="font-medium">Cumulative Depreciation:</span> ${asset.cumulativeDepreciation}</p>
+                <p><span className="font-medium">Opening Balance:</span> Rs.{asset.openingBalance}</p>
+                <p><span className="font-medium">Addition:</span> Rs.{asset.addition}</p>
+                <p><span className="font-medium">Depreciation:</span> Rs.{asset.depreciation}</p>
+                <p><span className="font-medium">WDV:</span> Rs.{asset.wdv}</p>
+                <p><span className="font-medium">Cumulative Depreciation:</span> Rs.{asset.cumulativeDepreciation}</p>
                 <p><span className="font-medium">Purchase Date:</span> {new Date(asset.dateOfPurchase).toLocaleDateString()}</p>
-                <p><span className="font-medium">Purchase Value:</span> ${asset.purchaseValue}</p>
-                <p><span className="font-medium">Current Value:</span> ${asset.currentValue}</p>
+                <p><span className="font-medium">Purchase Value:</span> Rs.{asset.purchaseValue}</p>
+                <p><span className="font-medium">Current Value:</span> Rs.{asset.currentValue}</p>
                 <p><span className="font-medium">Depreciation Rate:</span> {asset.depreciationRate}%</p>
                 <p><span className="font-medium">Useful Life:</span> {asset.usefulLife} years</p>
-                <p><span className="font-medium">Salvage Value:</span> ${asset.salvageValue}</p>
+                <p><span className="font-medium">Salvage Value:</span> Rs.{asset.salvageValue}</p>
               </div>
             </div>
 
