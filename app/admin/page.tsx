@@ -42,7 +42,7 @@ export default function AdminDashboard() {
             </div>
           </Link>
 
-          <Link href="/admin/asset-categories" className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+          {/* <Link href="/admin/asset-categories" className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
             <div className="flex items-center gap-4">
               <FileSpreadsheet className="text-[#18BC9C]" size={24} />
               <div>
@@ -50,9 +50,9 @@ export default function AdminDashboard() {
                 <p className="text-sm text-gray-600">Configure asset categories</p>
               </div>
             </div>
-          </Link>
+          </Link> */}
 
-          <Link href="/admin/approval-rules" className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+          {/* <Link href="/admin/approval-rules" className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
             <div className="flex items-center gap-4">
               <Settings className="text-[#18BC9C]" size={24} />
               <div>
@@ -60,7 +60,7 @@ export default function AdminDashboard() {
                 <p className="text-sm text-gray-600">Set up approval workflows</p>
               </div>
             </div>
-          </Link>
+          </Link> */}
 
           <Link href="/admin/roles" className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
             <div className="flex items-center gap-4">
