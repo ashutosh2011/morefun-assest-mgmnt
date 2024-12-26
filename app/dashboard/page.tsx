@@ -1,15 +1,16 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Box, AlertTriangle, Clock, Package, Archive } from 'lucide-react';
+import { Box, AlertTriangle, Clock, Package, Archive, Settings } from 'lucide-react';
 import { StatCard } from '@/components/Dashboard/StatCard';
 import { ActivityList } from '@/components/Dashboard/ActivityList';
 import { QuickActions } from '@/components/Dashboard/QuickActions';
+import Link from 'next/link';
 
 interface DashboardStats {
   user: {
     name: string;
-    role: string;
+    role: {id: string, roleName: string};
   };
   personal: {
     assignedAssets: number;
@@ -65,15 +66,27 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#ECF0F1]">
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-[#2C3E50]">
-            Welcome back, {stats.user.name}!
-          </h1>
-          <p className="text-gray-600">
-            {stats.user.role !== 'User' 
-              ? "Here's your management dashboard overview"
-              : "Here's an overview of your assets and activities"}
-          </p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-[#2C3E50]">
+              Welcome back, {stats.user.name}!
+            </h1>
+            <p className="text-gray-600">
+              {stats.user.role.roleName !== 'User' 
+                ? "Here's your management dashboard overview"
+                : "Here's an overview of your assets and activities"}
+            </p>
+          </div>
+          
+          {/* Add Admin Settings Button */}
+          {stats.user.role.roleName === 'Admin' && (
+            <Link href="/admin">
+              <button className="flex items-center gap-2 px-4 py-2 bg-[#2C3E50] text-white rounded-lg hover:bg-[#2C3E50]/90 transition-colors">
+                <Settings size={20} />
+                <span>System Settings</span>
+              </button>
+            </Link>
+          )}
         </div>
 
         {/* User-specific stats */}

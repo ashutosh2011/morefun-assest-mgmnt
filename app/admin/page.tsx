@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Building2, Users2, Box, FileSpreadsheet, Settings } from 'lucide-react';
+import { Shield, Building2, Users2, Box, FileSpreadsheet, Settings, UserCog, GitBranch } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
@@ -7,7 +7,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-[#ECF0F1]">
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-[#2C3E50]">Admin Dashboard</h1>
+          <h1 className="text-2xl font-bold text-[#2C3E50]">System Settings</h1>
           <p className="text-gray-600">Manage system settings and configurations</p>
         </div>
 
@@ -58,6 +58,26 @@ export default function AdminDashboard() {
               <div>
                 <h3 className="font-semibold text-[#2C3E50]">Approval Rules</h3>
                 <p className="text-sm text-gray-600">Set up approval workflows</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/admin/roles" className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-4">
+              <UserCog className="text-[#18BC9C]" size={24} />
+              <div>
+                <h3 className="font-semibold text-[#2C3E50]">Manage Roles</h3>
+                <p className="text-sm text-gray-600">Configure user roles and permissions</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/admin/approval-flows" className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-4">
+              <GitBranch className="text-[#18BC9C]" size={24} />
+              <div>
+                <h3 className="font-semibold text-[#2C3E50]">Approval Flows</h3>
+                <p className="text-sm text-gray-600">Configure approval workflows</p>
               </div>
             </div>
           </Link>
