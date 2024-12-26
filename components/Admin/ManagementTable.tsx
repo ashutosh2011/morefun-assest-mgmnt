@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pencil, Trash2, Plus } from 'lucide-react';
+import { Pencil, Trash2, Plus, Loader2 } from 'lucide-react';
 
 interface Column {
   key: string;
@@ -13,7 +13,8 @@ interface ManagementTableProps {
   data: any[];
   onAdd: () => void;
   onEdit: (item: any) => void;
-  onDelete: (item: any) => void;
+  onDelete?: (item: any) => void;
+  loading?: boolean;
 }
 
 export function ManagementTable({
@@ -23,7 +24,8 @@ export function ManagementTable({
   data,
   onAdd,
   onEdit,
-  onDelete
+  onDelete,
+  loading
 }: ManagementTableProps) {
   return (
     <div className="bg-white rounded-lg shadow-md">
@@ -73,12 +75,19 @@ export function ManagementTable({
                   >
                     <Pencil size={18} />
                   </button>
-                  <button
-                    onClick={() => onDelete(item)}
-                    className="text-[#E74C3C] hover:text-[#E74C3C]/80"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  {onDelete && (
+                    <button
+                      onClick={() => onDelete(item)}
+                      className="text-[#E74C3C] hover:text-[#E74C3C]/80 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 size={18} />
+                      )}
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
