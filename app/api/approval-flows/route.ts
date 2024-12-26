@@ -20,15 +20,21 @@ export async function GET(request: Request) {
           }
         }
       },
-      orderBy: {
-        assetType: {
-          typeName: 'asc'
+      orderBy: [
+        {
+          assetType: {
+            assetTypeName: 'asc'
+          }
+        },
+        {
+          levelNumber: 'asc'
         }
-      },
+      ],
     });
 
     return NextResponse.json(approvalLevels);
   } catch (error) {
+    console.error('Error fetching approval flows:', error);
     return NextResponse.json(
       { error: 'Failed to fetch approval flows' },
       { status: 500 }
@@ -45,25 +51,61 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
-    const { levels } = data;
+    
+    // Check if a level with this number already exists for this asset type
+    const existingLevel = await prisma.approvalLevel.findFirst({
+      where: {
+        assetTypeId: data.assetTypeId,
+        levelNumber: data.levelNumber,
+      },
+    });
 
-    // Create approval levels in sequence
-    let previousLevel = null;
-    for (const level of levels) {
-      const approvalLevel = await prisma.approvalLevel.create({
-        data: {
-          levelNumber: level.levelNumber,
-          description: level.description,
-          role: { connect: { id: level.roleId } },
-          assetType: { connect: { id: level.assetTypeId } },
-          ...(previousLevel && { previousLevel: { connect: { id: previousLevel.id } } })
-        },
-      });
-      previousLevel = approvalLevel;
+    if (existingLevel) {
+      return NextResponse.json(
+        { error: 'An approval level with this number already exists for this asset type' },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ success: true });
+    // Find the previous level (if any) based on level number
+    const previousLevel = await prisma.approvalLevel.findFirst({
+      where: {
+        assetTypeId: data.assetTypeId,
+        levelNumber: {
+          lt: data.levelNumber
+        },
+        nextLevelId: null // Only get the one that doesn't have a next level
+      },
+      orderBy: {
+        levelNumber: 'desc'
+      }
+    });
+
+    // Create the new approval level
+    const approvalLevel = await prisma.approvalLevel.create({
+      data: {
+        levelNumber: data.levelNumber,
+        description: data.description,
+        roleId: data.roleId,
+        assetTypeId: data.assetTypeId,
+      },
+      include: {
+        role: true,
+        assetType: true,
+      },
+    });
+
+    // If there was a previous level, update its nextLevelId
+    if (previousLevel) {
+      await prisma.approvalLevel.update({
+        where: { id: previousLevel.id },
+        data: { nextLevelId: approvalLevel.id }
+      });
+    }
+
+    return NextResponse.json(approvalLevel);
   } catch (error) {
+    console.error('Error creating approval flow:', error);
     return NextResponse.json(
       { error: 'Failed to create approval flow' },
       { status: 500 }

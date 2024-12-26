@@ -167,23 +167,24 @@ model Approval {
 }
 
 model ApprovalLevel {
-  id           String    @id @default(uuid())
-  levelNumber  Int       @unique
-  description String?
+  id           String    @id @default(cuid())
+  levelNumber  Int
+  assetTypeId  String
+  roleId       String
+  assetType    AssetType @relation(fields: [assetTypeId], references: [id])
+  role         Role      @relation(fields: [roleId], references: [id])
+  description  String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
   // Relations
-  role         Role      @relation(fields: [roleId], references: [id])
-  roleId       String
-  assetType    AssetType @relation(fields: [assetTypeId], references: [id])
-  assetTypeId  String
-  nextLevel    ApprovalLevel? @relation("ApprovalLevelFlow", fields: [nextLevelId], references: [id])
-  nextLevelId  String?       @unique
+  nextLevel    ApprovalLevel?  @relation("ApprovalLevelFlow", fields: [nextLevelId], references: [id])
+  nextLevelId  String?        @unique
   previousLevel ApprovalLevel? @relation("ApprovalLevelFlow")
   scrapRequests ScrapRequest[]
   approvals     Approval[]
 
+  @@unique([assetTypeId, levelNumber])
   @@map("approval_levels")
 }
 
