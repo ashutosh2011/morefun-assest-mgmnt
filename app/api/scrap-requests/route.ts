@@ -104,7 +104,7 @@ export async function GET(request: Request) {
             select: {
               id: true,
               assetName: true,
-              serialNumber: true,
+              billNumber: true,
             }
           },
           requestedBy: {

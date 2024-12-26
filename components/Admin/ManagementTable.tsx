@@ -1,5 +1,8 @@
-import React from 'react';
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Pencil, Trash2, Loader2, FileDown } from 'lucide-react';
+import { toast } from 'sonner';
+import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
+import { AssetFilters } from '../Assets/AssetFilters';
 
 interface Column {
   key: string;
@@ -17,6 +20,10 @@ interface ManagementTableProps {
   onDelete?: (item: any) => void;
   loading?: boolean;
   hideAddButton?: boolean;
+  downloadEndpoint?: string;
+  filters?: Record<string, string>;
+  showFilters?: boolean;
+  onFilterChange?: (key: string, value: string) => void;
 }
 
 export function ManagementTable({
@@ -28,8 +35,14 @@ export function ManagementTable({
   onEdit,
   onDelete,
   loading,
-  hideAddButton
+  hideAddButton,
+  downloadEndpoint,
+  filters,
+  showFilters = false,
+  onFilterChange
 }: ManagementTableProps) {
+  const [downloading, setDownloading] = useState(false);
+
   const renderCell = (row: any, column: Column) => {
     if (column.render) {
       return column.render(row);
@@ -37,6 +50,44 @@ export function ManagementTable({
     
     const value = column.key.split('.').reduce((obj, key) => obj?.[key], row);
     return value ?? 'N/A';
+  };
+
+  const handleDownload = async (type: 'excel' | 'csv') => {
+    if (!downloadEndpoint || downloading) return;
+
+    try {
+      setDownloading(true);
+      const queryParams = new URLSearchParams({
+        ...(filters || {}),
+        type
+      });
+
+      const response = await fetchWithAuth(`${downloadEndpoint}?${queryParams}`, {
+        method: 'GET'
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to download file');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title.toLowerCase().replace(/\s+/g, '-')}.${type === 'csv' ? 'csv' : 'xlsx'}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('File downloaded successfully');
+    } catch (err) {
+      console.error('Download error:', err);
+      toast.error(err instanceof Error ? err.message : 'Failed to download file');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
@@ -47,17 +98,56 @@ export function ManagementTable({
             <h2 className="text-xl font-semibold text-[#2C3E50]">{title}</h2>
             <p className="text-gray-600">{description}</p>
           </div>
-          {!hideAddButton && onAdd && (
-            <button
-              onClick={onAdd}
-              className="flex items-center gap-2 px-4 py-2 bg-[#18BC9C] text-white rounded-lg hover:bg-[#18BC9C]/90"
-            >
-              <Plus size={20} />
-              Add New
-            </button>
-          )}
+          <div className="flex gap-2">
+            {downloadEndpoint && (
+              <>
+                <button
+                  onClick={() => handleDownload('excel')}
+                  disabled={downloading}
+                  className="flex items-center gap-2 px-4 py-2 text-sm border border-[#18BC9C] text-[#18BC9C] rounded-lg hover:bg-[#18BC9C]/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {downloading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <FileDown size={16} />
+                  )}
+                  Export Excel
+                </button>
+                <button
+                  onClick={() => handleDownload('csv')}
+                  disabled={downloading}
+                  className="flex items-center gap-2 px-4 py-2 text-sm border border-[#18BC9C] text-[#18BC9C] rounded-lg hover:bg-[#18BC9C]/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {downloading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <FileDown size={16} />
+                  )}
+                  Export CSV
+                </button>
+              </>
+            )}
+            {!hideAddButton && onAdd && (
+              <button
+                onClick={onAdd}
+                className="flex items-center gap-2 px-4 py-2 bg-[#18BC9C] text-white rounded-lg hover:bg-[#18BC9C]/90"
+              >
+                <Plus size={20} />
+                Add New
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {showFilters && filters && onFilterChange && (
+        <div className="px-6">
+          <AssetFilters 
+            filters={filters} 
+            onFilterChange={onFilterChange} 
+          />
+        </div>
+      )}
 
       <div className="overflow-x-auto">
         <table className="w-full">

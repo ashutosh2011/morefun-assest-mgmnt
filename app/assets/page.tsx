@@ -36,7 +36,7 @@ export default function AssetList() {
           </div>
         </div>
 
-        <AssetFilters />
+        {/* <AssetFilters /> */}
         <AssetTable />
       </main>
     </div>

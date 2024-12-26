@@ -140,7 +140,7 @@ export async function GET(
           select: {
             id: true,
             assetName: true,
-            serialNumber: true,
+            billNumber: true,
             assetType: true,
             department: true
           }

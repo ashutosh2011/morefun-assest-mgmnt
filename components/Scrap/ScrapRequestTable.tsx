@@ -1,15 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CheckCircle, XCircle, Eye } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, FileDown, Loader2 } from 'lucide-react';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { ScrapRequestDetailsModal } from './ScrapRequestDetailsModal';
+import { toast } from 'sonner';
 
 interface ScrapRequest {
   id: string;
   asset: {
     assetName: string;
-    serialNumber: string;
+    billNumber: string;
   };
   requestedBy: {
     fullName: string;
@@ -61,7 +62,7 @@ export function ScrapRequestTable() {
       setRequests(data.scrapRequests);
       setTotalPages(data.totalPages);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      toast.error(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -95,7 +96,7 @@ export function ScrapRequestTable() {
       // Refresh the requests list
       fetchScrapRequests();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to approve request');
+      toast.error(err instanceof Error ? err.message : 'Failed to approve request');
     }
   };
 
@@ -117,7 +118,7 @@ export function ScrapRequestTable() {
       // Refresh the requests list
       fetchScrapRequests();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reject request');
+      toast.error(err instanceof Error ? err.message : 'Failed to reject request');
     }
   };
 
@@ -130,12 +131,44 @@ export function ScrapRequestTable() {
       setSelectedRequest(data);
       setIsDetailsModalOpen(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch request details');
+      toast.error(err instanceof Error ? err.message : 'Failed to fetch request details');
+    }
+  };
+
+  const handleDownload = async (type: 'excel' | 'csv') => {
+    try {
+      const queryParams = new URLSearchParams({
+        ...(filters.status && { status: filters.status }),
+        type
+      });
+
+      const response = await fetchWithAuth(`/api/scrap-requests/bulk-download?${queryParams}`, {
+        method: 'GET'
+      });
+
+      if (!response.ok) throw new Error('Failed to download');
+
+      // Create blob and trigger download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `scrap-requests.${type === 'csv' ? 'csv' : 'xlsx'}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error('Failed to download file');
     }
   };
 
   if (loading) {
-    return <div className="text-center py-4">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-[#18BC9C]" />
+      </div>
+    );
   }
 
   if (error) {
@@ -144,6 +177,24 @@ export function ScrapRequestTable() {
 
   return (
     <div className="space-y-4">
+      {/* Add download buttons before the filters */}
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => handleDownload('excel')}
+          className="flex items-center gap-2 px-4 py-2 text-sm border border-[#18BC9C] text-[#18BC9C] rounded-lg hover:bg-[#18BC9C]/10"
+        >
+          <FileDown size={16} />
+          Export Excel
+        </button>
+        <button
+          onClick={() => handleDownload('csv')}
+          className="flex items-center gap-2 px-4 py-2 text-sm border border-[#18BC9C] text-[#18BC9C] rounded-lg hover:bg-[#18BC9C]/10"
+        >
+          <FileDown size={16} />
+          Export CSV
+        </button>
+      </div>
+
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow-md mb-4">
         <div className="flex gap-4">
@@ -192,7 +243,7 @@ export function ScrapRequestTable() {
                   <td className="px-6 py-4">
                     <div className="text-sm">
                       <p className="font-medium text-[#2C3E50]">{request.asset.assetName}</p>
-                      <p className="text-gray-500">{request.asset.serialNumber}</p>
+                      <p className="text-gray-500">{request.asset.billNumber}</p>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-[#2C3E50]">{request.requestedBy.fullName}</td>
