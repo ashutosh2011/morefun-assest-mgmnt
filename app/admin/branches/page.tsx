@@ -4,22 +4,27 @@ import React, { useState, useEffect } from 'react';
 import { ManagementTable } from '@/components/Admin/ManagementTable';
 import { FormModal } from '@/components/Admin/FormModal';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 export default function ManageBranches() {
   const [branches, setBranches] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState(null);
+  const [loading, setLoading] = useState({
+    table: true,
+    form: false,
+    delete: false
+  });
 
   const columns = [
     { key: 'branchName', label: 'Branch Name' },
     { key: 'location', label: 'Location' },
-    { key: 'code', label: 'Branch Code' },
   ];
 
   const fields = [
-    { key: 'branchName', label: 'Branch Name', type: 'text', required: true },
+    { key: 'branchName', label: 'Branch Name (Unique)', type: 'text', required: true },
     { key: 'location', label: 'Location', type: 'text', required: true },
-    { key: 'code', label: 'Branch Code', type: 'text', required: true },
   ];
 
   useEffect(() => {
@@ -28,11 +33,18 @@ export default function ManageBranches() {
 
   const fetchBranches = async () => {
     try {
+      setLoading(prev => ({ ...prev, table: true }));
       const response = await fetchWithAuth('/api/branches');
+      if (!response.ok) {
+        throw new Error('Failed to fetch branches');
+      }
       const data = await response.json();
       setBranches(data);
     } catch (error) {
       console.error('Error fetching branches:', error);
+      toast.error('Failed to fetch branches');
+    } finally {
+      setLoading(prev => ({ ...prev, table: false }));
     }
   };
 
@@ -50,51 +62,97 @@ export default function ManageBranches() {
     if (!confirm('Are you sure you want to delete this branch?')) return;
 
     try {
-      await fetchWithAuth(`/api/branches/${branch.id}`, {
+      setLoading(prev => ({ ...prev, delete: true }));
+      const response = await fetchWithAuth(`/api/branches/${branch.id}`, {
         method: 'DELETE',
       });
-      fetchBranches();
-    } catch (error) {
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.success('Branch deleted successfully');
+        fetchBranches();
+      }
+    } catch (error: any) {
       console.error('Error deleting branch:', error);
+      if (error.response) {
+        const errorData = await error.response.json();
+        toast.error(errorData.error || 'Failed to delete branch');
+      } else {
+        toast.error('Failed to delete branch');
+      }
+    } finally {
+      setLoading(prev => ({ ...prev, delete: false }));
     }
   };
 
   const handleSubmit = async (data: any) => {
     try {
-      await fetchWithAuth(`/api/branches${editingBranch ? `/${editingBranch.id}` : ''}`, {
+      setLoading(prev => ({ ...prev, form: true }));
+      const response = await fetchWithAuth(`/api/branches${editingBranch ? `/${editingBranch.id}` : ''}`, {
         method: editingBranch ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          branchName: data.branchName,
+          location: data.location,
+        }),
       });
-      setIsModalOpen(false);
-      fetchBranches();
-    } catch (error) {
+
+      const responseData = await response.json();
+      
+      if (response.ok) {
+        toast.success(`Branch ${editingBranch ? 'updated' : 'created'} successfully`);
+        setIsModalOpen(false);
+        fetchBranches();
+      }
+    } catch (error: any) {
       console.error('Error saving branch:', error);
+      if (error.response) {
+        const errorData = await error.response.json();
+        toast.error(errorData.error || 'Failed to save branch');
+      } else {
+        toast.error('Failed to save branch');
+      }
+    } finally {
+      setLoading(prev => ({ ...prev, form: false }));
     }
   };
 
   return (
     <div className="min-h-screen bg-[#ECF0F1]">
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <ManagementTable
-          title="Manage Branches"
-          description="Add and edit company branches"
-          columns={columns}
-          data={branches}
-          onAdd={handleAdd}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-[#2C3E50]">Manage Branches</h1>
+          <p className="text-gray-600">Add and edit company branches</p>
+        </div>
+
+        {loading.table ? (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Loader2 className="w-8 h-8 animate-spin text-[#18BC9C]" />
+          </div>
+        ) : (
+          <ManagementTable
+            title="Manage Branches"
+            description="Add and edit company branches"
+            columns={columns}
+            data={branches}
+            onAdd={handleAdd}
+            onEdit={handleEdit}
+            onDelete={!loading.delete ? handleDelete : undefined}
+            loading={loading.delete}
+          />
+        )}
 
         <FormModal
           title={editingBranch ? 'Edit Branch' : 'Add Branch'}
           fields={fields}
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => !loading.form && setIsModalOpen(false)}
           onSubmit={handleSubmit}
           initialData={editingBranch}
+          loading={loading.form}
         />
       </main>
     </div>
