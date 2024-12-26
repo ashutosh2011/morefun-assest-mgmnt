@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Building2, Users2, Box, FileSpreadsheet, Settings, UserCog, GitBranch } from 'lucide-react';
+import { Shield, Building2, Users2, Box, FileSpreadsheet, Settings, UserCog, GitBranch, User } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
@@ -78,6 +78,16 @@ export default function AdminDashboard() {
               <div>
                 <h3 className="font-semibold text-[#2C3E50]">Approval Flows</h3>
                 <p className="text-sm text-gray-600">Configure approval workflows</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/admin/users" className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-4">
+              <User className="text-[#18BC9C]" size={24} />
+              <div>
+                <h3 className="font-semibold text-[#2C3E50]">Manage Users</h3>
+                <p className="text-sm text-gray-600">Configure user roles and passwords</p>
               </div>
             </div>
           </Link>
