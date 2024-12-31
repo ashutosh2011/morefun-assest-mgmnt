@@ -274,7 +274,7 @@ export function AssetForm() {
                 <option value="">Select Location</option>
                 {branches?.map((branch) => (
                   <option key={branch.id} value={branch.id}>
-                    {branch.name}
+                    {branch.location}
                   </option>
                 ))}
               </select>
