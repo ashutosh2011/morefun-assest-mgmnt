@@ -1,4 +1,3 @@
-
 'use client';
 
 export async function fetchWithAuth(url: string, options: RequestInit = {}) {
@@ -19,17 +18,31 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
     const response = await fetch(url, options);
     
     if (!response.ok) {
-      // Handle unauthorized or other error responses
+      // Try to get the error message from the response body
+      const errorData = await response.json().catch(() => null);
+      
       if (response.status === 401) {
-        // Handle unauthorized - could redirect to login
-        throw new Error('Unauthorized');
+        throw new Error(errorData?.message || 'Unauthorized');
       }
+
+      // If we have an error message from the backend, use it
+      if (errorData?.message) {
+        throw new Error(errorData.message);
+      } else if (errorData?.error) {
+        throw new Error(errorData.error);
+      }
+      
+      // Fallback to generic error if no specific message
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     return response;
   } catch (error) {
-    console.error('Fetch error:', error);
+    if (error instanceof Error) {
+      console.log('Fetch error:', error.message);
+    } else {
+      console.log('Fetch error: Cannot parse error message');
+    }
     throw error;
   }
 }

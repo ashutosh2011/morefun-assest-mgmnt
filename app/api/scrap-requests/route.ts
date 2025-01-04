@@ -18,6 +18,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Asset ID and reason are required' }, { status: 400 });
     }
 
+    // First get the asset to determine its asset type
+    const asset = await prisma.asset.findUnique({
+      where: { id: assetId },
+      include: { assetType: true }
+    });
+
+    if (!asset) {
+      return NextResponse.json({ error: 'Asset not found' }, { status: 404 });
+    }
+
     const existingScrapRequest = await prisma.scrapRequest.findFirst({
       where: {
         assetId,
@@ -28,7 +38,25 @@ export async function POST(request: Request) {
     });
 
     if (existingScrapRequest) {
-      return NextResponse.json({ error: 'A scrap request for this asset is already pending or approved' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'A scrap request for this asset is already pending or approved' },
+        { status: 400 }
+      );
+    }
+
+    // Get the first approval level for this asset type
+    const firstApprovalLevel = await prisma.approvalLevel.findFirst({
+      where: {
+        assetTypeId: asset.assetTypeId,
+        levelNumber: 1
+      }
+    });
+
+    if (!firstApprovalLevel) {
+      return NextResponse.json(
+        { error: 'No approval workflow found for this asset type' },
+        { status: 400 }
+      );
     }
 
     // Create a new scrap request
@@ -43,21 +71,23 @@ export async function POST(request: Request) {
           connect: { id: user.id },
         },
         currentApprovalLevel: {
-            connect: {
-                levelNumber: 1
+          connect: { 
+            assetTypeId_levelNumber: {
+              assetTypeId: asset.assetTypeId,
+              levelNumber: 1
             }
+          }
         },
       },
     });
 
     return NextResponse.json(scrapRequest);
   } catch (error) {
-    if(error instanceof Prisma.PrismaClientKnownRequestError) {
-        console.error('Error creating asset:', error.message);
-      } else {
-        console.error('Error creating asset:', error);
-      }
-    return NextResponse.json({ error: 'Failed to create scrap request', message: error }, { status: 500 });
+    console.error('Error creating scrap request:', error);
+    return NextResponse.json(
+      { error: 'Failed to create scrap request' },
+      { status: 500 }
+    );
   }
 }
 
