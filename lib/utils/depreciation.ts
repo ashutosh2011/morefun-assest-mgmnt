@@ -1,80 +1,98 @@
-import { Asset, AssetType } from '@prisma/client';
+import { Asset, AssetType, AssetDepreciation } from '@prisma/client';
 
 interface DepreciationResult {
-  currentValue: number;
-  depreciationAmount: number;
+  openingBalance: number;
+  addition: number;
+  depreciation: number;
+  wdv: number;
   cumulativeDepreciation: number;
-  wdv: number; // Written Down Value
+  year: number;
 }
 
 export function calculateDepreciation(
-  asset: Asset & { assetType: AssetType }
+  asset: Asset & { assetType: AssetType; depreciations?: AssetDepreciation[] }
 ): DepreciationResult {
   // If asset is scrapped, calculate depreciation until scrap date
   const calculationDate = asset.assetUsageStatus === 'SCRAPPED' 
     ? asset.scrappedAtDate || new Date()
     : new Date();
 
-  // Get the initial values
-  const totalValue = asset.openingBalance + asset.addition;
-  const depreciationRate = asset.assetType.depreciationPercentage / 100;
+  const currentYear = calculationDate.getFullYear();
   
-  // Calculate days in use
-  const billDate = new Date(asset.billDate);
-  const daysInUse = Math.floor(
-    (calculationDate.getTime() - billDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
-
-  // If asset is less than a day old, return initial values
-  if (daysInUse < 1) {
-    return {
-      currentValue: totalValue,
-      depreciationAmount: 0,
-      cumulativeDepreciation: 0,
-      wdv: totalValue
-    };
-  }
+  // Get the latest depreciation record
+  const lastDepreciation = asset.depreciations?.sort((a, b) => b.year - a.year)[0];
+  
+  // Calculate opening balance for current year
+  const openingBalance = lastDepreciation 
+    ? lastDepreciation.wdv 
+    : asset.openingBalance;
 
   // Calculate depreciation
-  const depreciation = totalValue * depreciationRate * (daysInUse / 365);
+  const totalValue = openingBalance + asset.addition;
+  const depreciationRate = asset.assetType.depreciationPercentage / 100;
+  
+  // Calculate days in current year
+  const yearStartDate = new Date(currentYear, 0, 1);
+  const daysInYear = Math.floor(
+    (calculationDate.getTime() - yearStartDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  // Calculate depreciation for current year
+  const depreciation = totalValue * depreciationRate * (daysInYear / 365);
   
   // Calculate WDV
   const wdv = totalValue - depreciation;
 
-  // Ensure WDV doesn't go below 5% of original value (as per Indian accounting practices)
+  // Ensure WDV doesn't go below 5% of original value
   const minimumValue = totalValue * 0.05;
   const finalWdv = Math.max(wdv, minimumValue);
   const finalDepreciation = totalValue - finalWdv;
 
+  // Calculate cumulative depreciation
+  const previousCumulativeDepreciation = lastDepreciation?.cumulativeDepreciation || 0;
+  const cumulativeDepreciation = previousCumulativeDepreciation + finalDepreciation;
+
   return {
-    currentValue: finalWdv,
-    depreciationAmount: finalDepreciation - (asset.depreciation || 0), // New depreciation for this period
-    cumulativeDepreciation: finalDepreciation,
-    wdv: finalWdv
+    openingBalance,
+    addition: asset.addition,
+    depreciation: finalDepreciation,
+    wdv: finalWdv,
+    cumulativeDepreciation,
+    year: currentYear
   };
 }
 
-// Helper function to update asset depreciation values
 export async function updateAssetDepreciation(
   prisma: any,
   asset: Asset & { assetType: AssetType }
 ) {
   const depreciation = calculateDepreciation(asset);
 
+  // Create new depreciation record
+  await prisma.assetDepreciation.create({
+    data: {
+      year: depreciation.year,
+      openingBalance: depreciation.openingBalance,
+      addition: depreciation.addition,
+      depreciation: depreciation.depreciation,
+      wdv: depreciation.wdv,
+      cumulativeDepreciation: depreciation.cumulativeDepreciation,
+      asset: { connect: { id: asset.id } }
+    }
+  });
+
+  // Update asset's current WDV
   return await prisma.asset.update({
     where: { id: asset.id },
     data: {
-      depreciation: depreciation.depreciationAmount,
-      cumulativeDepreciation: depreciation.cumulativeDepreciation,
-      wdv: depreciation.wdv
+      wdv: depreciation.wdv,
+      lastDepreciationDate: new Date()
     }
   });
 }
 
-// Batch update function for cron job
 export async function batchUpdateDepreciation(prisma: any) {
   try {
-    // Get all active assets with their asset types
     const assets = await prisma.asset.findMany({
       where: {
         assetUsageStatus: {
@@ -82,11 +100,11 @@ export async function batchUpdateDepreciation(prisma: any) {
         }
       },
       include: {
-        assetType: true
+        assetType: true,
+        depreciations: true
       }
     });
 
-    // Update depreciation for each asset
     const updates = assets.map(asset => updateAssetDepreciation(prisma, asset));
     await Promise.all(updates);
 

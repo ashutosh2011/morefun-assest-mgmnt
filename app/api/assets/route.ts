@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
-import { updateAssetDepreciation } from '@/lib/utils/depreciation';
+import { createAssetWithDepreciation } from '@/lib/utils/assetDepreciation';
+import { AssetUsageStatus } from '@/lib/constants';
 
 export async function POST(request: Request) {
   try {
@@ -13,78 +14,76 @@ export async function POST(request: Request) {
 
     const data = await request.json();
 
-    console.log(data);
-    data.branchId = data.location
-    data.location = await prisma.branch.findUnique({where: {id: data.branchId}})
-    data.location = data.location.branchName
     // Input validation
-    if (!data.name || !data.assetTypeId || !data.branchId) {
+    if (!data.name || !data.assetTypeId || !data.location) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    // Calculate WDV and cumulative depreciation based on opening balance and addition
-    const openingBalance = parseFloat(data.openingBalance) || 0;
-    const addition = parseFloat(data.addition) || 0;
-    const wdv = openingBalance + addition;
-
-    const asset = await prisma.asset.create({
-      data: {
-        customAssetId: data.customAssetId,
-        assetName: data.name,
-        description: data.description,
-        assetUsage: data.assetUsage,
-        company: data.company,
-        location: data.location,
-        assetCategory: data.assetCategory,
-        vendorName: data.vendorName,
-        billDate: data.billDate ? new Date(data.billDate) : null,
-        billNumber: data.billNumber,
-        openingBalance: openingBalance,
-        addition: addition,
-        depreciation: 0,
-        wdv: wdv,
-        cumulativeDepreciation: 0,
-        remarks: data.remarks,
-        assetUsageStatus: 'IN_USE',
-        scrappedAtDate: null,
-        department: data.departmentId ? {
-          connect: { id: data.departmentId }
-        } : undefined,
-        branch: {
-          connect: { id: data.branchId }
-        },
-        user: data.assignedUserId ? {
-          connect: { id: data.assignedUserId }
-        } : undefined,
-        assetType: {
-          connect: { id: data.assetTypeId }
-        },
-        serialNumber: data.serialNumber,
-        // purchaseValue: parseFloat(data.purchaseValue) || 0,
-        // depreciationRate: parseFloat(data.depreciationRate) || 0,
-        // usefulLife: parseInt(data.usefulLife) || 0,
-        quantity: 1,
-      },
-      include: {
-        assetType: true
-      }
+    // Get branch details
+    data.branchId = data.location;
+    const branch = await prisma.branch.findUnique({
+      where: { id: data.branchId }
     });
-
-    // Calculate and update depreciation values
-    const updatedAsset = await updateAssetDepreciation(prisma, asset);
-
-    return NextResponse.json(updatedAsset);
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      console.error('Prisma error creating asset:', error.message);
+    if (!branch) {
       return NextResponse.json(
-        { error: 'Database error while creating asset' },
+        { error: 'Invalid branch selected' },
         { status: 400 }
       );
     }
+    data.location = branch.branchName;
+
+    // Get asset type for depreciation calculation
+    const assetType = await prisma.assetType.findUnique({
+      where: { id: data.assetTypeId }
+    });
+    if (!assetType) {
+      return NextResponse.json(
+        { error: 'Invalid asset type selected' },
+        { status: 400 }
+      );
+    }
+
+    // Prepare asset data
+    const assetData = {
+      customAssetId: data.customAssetId,
+      assetName: data.name,
+      description: data.description,
+      assetUsage: data.assetUsage,
+      company: data.company,
+      location: data.location,
+      assetCategory: data.assetCategory,
+      vendorName: data.vendorName,
+      billDate: data.billDate ? new Date(data.billDate) : new Date(),
+      billNumber: data.billNumber,
+      openingBalance: parseFloat(data.openingBalance) || 0,
+      addition: parseFloat(data.addition) || 0,
+      remarks: data.remarks,
+      assetUsageStatus: AssetUsageStatus.IN_USE,
+      scrappedAtDate: null,
+      department: data.departmentId ? {
+        connect: { id: data.departmentId }
+      } : undefined,
+      branch: {
+        connect: { id: data.branchId }
+      },
+      user: data.assignedUserId ? {
+        connect: { id: data.assignedUserId }
+      } : undefined,
+      assetType: {
+        connect: { id: data.assetTypeId }
+      },
+      serialNumber: data.serialNumber,
+      quantity: 1,
+    };
+
+    // Create asset with historical depreciation
+    const asset = await createAssetWithDepreciation(prisma, assetData, assetType);
+    return NextResponse.json(asset);
+
+  } catch (error) {
     console.error('Error creating asset:', error);
     return NextResponse.json(
       { error: 'Failed to create asset' },

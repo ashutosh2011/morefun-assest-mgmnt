@@ -1,8 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Calendar } from 'lucide-react';
+import { Calendar, Loader2 } from 'lucide-react';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+
 interface User {
   id: string;
   fullName: string;
@@ -51,13 +54,20 @@ interface Department {
   departmentName: string;
 }
 
-export function AssetForm() {
+interface AssetFormProps {
+  assetId?: string;
+}
+
+export function AssetForm({ assetId }: AssetFormProps) {
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [assetTypes, setAssetTypes] = useState<AssetType[]>([]);
   const [assetCategories, setAssetCategories] = useState<AssetCategory[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingAsset, setLoadingAsset] = useState(assetId ? true : false);
 
   const [formData, setFormData] = useState<AssetFormData>({
     customAssetId: '',
@@ -114,6 +124,32 @@ export function AssetForm() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (assetId) {
+      const fetchAsset = async () => {
+        try {
+          const response = await fetchWithAuth(`/api/assets/${assetId}`);
+          if (!response.ok) throw new Error('Failed to fetch asset');
+          const asset = await response.json();
+          
+          setFormData({
+            customAssetId: asset.customAssetId || '',
+            name: asset.assetName,
+            description: asset.description || '',
+            // ... map other fields
+          });
+        } catch (error) {
+          console.error('Error fetching asset:', error);
+          toast.error('Failed to fetch asset details');
+        } finally {
+          setLoadingAsset(false);
+        }
+      };
+
+      fetchAsset();
+    }
+  }, [assetId]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -125,8 +161,9 @@ export function AssetForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await fetchWithAuth('/api/assets', {
-        method: 'POST',
+      setIsSubmitting(true);
+      const response = await fetchWithAuth(`/api/assets${assetId ? `/${assetId}` : ''}`, {
+        method: assetId ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -134,41 +171,27 @@ export function AssetForm() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create asset');
+        const error = await response.json();
+        throw new Error(error.error || `Failed to ${assetId ? 'update' : 'create'} asset`);
       }
 
-      // Reset form after successful submission
-      setFormData({
-        customAssetId: '',
-        name: '',
-        description: '',
-        departmentId: '',
-        assetUsage: '',
-        company: '',
-        location: '',
-        assetCategory: '',
-        vendorName: '',
-        billDate: '',
-        billNumber: '',
-        openingBalance: '',
-        addition: '',
-        remarks: '',
-        assetTypeId: '',
-        branchId: '',
-        assignedUserId: '',
-        assetUsageStatus: ''
-      });
-
-      // You might want to add a success message or redirect here
+      toast.success(`Asset ${assetId ? 'updated' : 'created'} successfully`);
+      router.push('/assets');
     } catch (error) {
-      console.error('Error creating asset:', error);
-      // Handle error (show error message to user)
+      console.error(`Error ${assetId ? 'updating' : 'creating'} asset:`, error);
+      toast.error(error instanceof Error ? error.message : `Failed to ${assetId ? 'update' : 'create'} asset`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  if (loading) {
+  if (loading || loadingAsset) {
     return <div>Loading...</div>;
   }
+
+  const buttonText = isSubmitting 
+    ? (assetId ? 'Updating...' : 'Creating...') 
+    : (assetId ? 'Update Asset' : 'Create Asset');
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 max-w-5xl mx-auto">
@@ -464,9 +487,17 @@ export function AssetForm() {
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-[#18BC9C] text-white rounded-lg hover:bg-[#18BC9C]/90 transition-colors"
+            disabled={isSubmitting}
+            className="px-6 py-2 bg-[#18BC9C] text-white rounded-lg hover:bg-[#18BC9C]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            Create Asset
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Creating...</span>
+              </>
+            ) : (
+              <span>Create Asset</span>
+            )}
           </button>
         </div>
       </div>

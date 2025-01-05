@@ -1,9 +1,12 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
-import { Eye, Loader2 } from 'lucide-react';
+import { Eye, Loader2, Pencil } from 'lucide-react';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { AssetDetailsModal } from './AssetDetailsModal';
 import { ManagementTable } from '../Admin/ManagementTable';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 // Define the Filters type
 interface Filters {
@@ -44,6 +47,7 @@ export function AssetTable() {
     departmentId: '',
     search: ''
   });
+  const router = useRouter();
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -128,15 +132,30 @@ export function AssetTable() {
     }
   ];
 
-  const handleEdit = (asset: Asset) => {
-    // Implement edit functionality if needed
-    console.log('Edit asset:', asset);
-  };
-
-  const handleDelete = (asset: Asset) => {
-    // Implement delete functionality if needed
-    console.log('Delete asset:', asset);
-  };
+  const renderActions = (row: Asset) => (
+    <div className="flex gap-2 justify-end">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          handleViewAsset(row.id);
+        }}
+        className="text-gray-500 hover:text-gray-700 p-1"
+        title="View Details"
+      >
+        <Eye size={20} />
+      </button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          router.push(`/assets/edit/${row.id}`);
+        }}
+        className="text-gray-500 hover:text-gray-700 p-1"
+        title="Edit Asset"
+      >
+        <Pencil size={20} />
+      </button>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -155,9 +174,15 @@ export function AssetTable() {
       <ManagementTable
         title="Assets"
         description="Manage your organization's assets"
-        columns={columns}
+        columns={[
+          ...columns,
+          {
+            key: 'actions',
+            label: 'Actions',
+            render: renderActions
+          }
+        ]}
         data={assets}
-        onEdit={handleViewAsset}
         loading={loading}
         downloadEndpoint="/api/assets/bulk-download"
         filters={filters}

@@ -24,9 +24,8 @@ model Asset {
   billNumber       String
   openingBalance   Float
   addition         Float
-  depreciation     Float
-  wdv              Float         // Calculated field
-  cumulativeDepreciation Float   // Calculated field
+  lastDepreciationDate DateTime @default(now())
+  wdv              Float         // Current WDV
   assetUsage       String?       // New field
   assetUsageStatus String       // IN_USE, IDLE, SCRAPPED
   scrappedAtDate   DateTime?    // New field - nullable since not all assets are scrapped
@@ -45,6 +44,7 @@ model Asset {
   assetTypeId      String
   scrapRequests    ScrapRequest[]
   activities       Activity[]
+  depreciations    AssetDepreciation[]  // New relation
 
   @@map("assets")
 }
@@ -202,4 +202,22 @@ model Activity {
   assetId   String?
 
   @@map("activities")
+}
+
+model AssetDepreciation {
+  id                    String   @id @default(uuid())
+  year                  Int      // Fiscal year
+  openingBalance        Float    // Opening balance for the year
+  addition              Float    // Additions during the year
+  depreciation          Float    // Depreciation for the year
+  wdv                   Float    // WDV at end of year
+  cumulativeDepreciation Float   // Total depreciation up to this year
+  calculatedAt          DateTime @default(now())
+  
+  // Relations
+  asset                 Asset    @relation(fields: [assetId], references: [id])
+  assetId               String
+
+  @@unique([assetId, year])
+  @@map("asset_depreciations")
 }

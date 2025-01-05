@@ -134,33 +134,7 @@ async function main() {
     }
   })
 
-  // Create Assets
-  const laptop = await prisma.asset.create({
-    data: {
-      assetName: 'MacBook Pro',
-      description: 'M1 MacBook Pro 16"',
-      quantity: 1,
-      company: 'Apple Inc.',
-      location: 'Development Office',
-      assetCategory: 'Electronics',
-      vendorName: 'Apple Store',
-      billDate: new Date('2024-01-01'),
-      billNumber: 'BILL2024001',
-      openingBalance: 2000.00,
-      addition: 0.00,
-      depreciation: 200.00,
-      wdv: 1800.00,
-      cumulativeDepreciation: 200.00,
-      assetUsage: 'Development Work',
-      assetUsageStatus: 'IN_USE',
-      remarks: 'New laptop for development team',
-      department: { connect: { id: itDepartment.id } },
-      branch: { connect: { id: mainBranch.id } },
-      user: { connect: { id: adminUser.id } },
-      assetType: { connect: { id: laptopType.id } }
-    }
-  })
-
+  // Create an asset with initial depreciation record
   const desktop = await prisma.asset.create({
     data: {
       assetName: 'Dell Workstation',
@@ -174,7 +148,6 @@ async function main() {
       billNumber: 'BILL2024002',
       openingBalance: 1500.00,
       addition: 0.00,
-      depreciation: 100.00,
       wdv: 1400.00,
       cumulativeDepreciation: 100.00,
       assetUsage: 'Administrative Tasks',
@@ -183,31 +156,142 @@ async function main() {
       department: { connect: { id: adminDepartment.id } },
       branch: { connect: { id: mainBranch.id } },
       user: { connect: { id: regularUser.id } },
-      assetType: { connect: { id: desktopType.id } }
+      assetType: { connect: { id: desktopType.id } },
+      // Add initial depreciation record
+      depreciations: {
+        create: {
+          year: 2024,
+          openingBalance: 1500.00,
+          addition: 0.00,
+          depreciation: 100.00,
+          wdv: 1400.00,
+          cumulativeDepreciation: 100.00,
+          calculatedAt: new Date('2024-01-15')
+        }
+      }
     }
-  })
+  });
 
-  // Create a Scrap Request
+  // Create another asset with multiple depreciation records
+  const laptop = await prisma.asset.create({
+    data: {
+      assetName: 'MacBook Pro',
+      description: 'MacBook Pro 16-inch',
+      quantity: 1,
+      company: 'Apple Inc',
+      location: 'Development Office',
+      assetCategory: 'Electronics',
+      vendorName: 'Apple Store',
+      billDate: new Date('2023-01-15'), // Note: Previous year
+      billNumber: 'BILL2023001',
+      openingBalance: 2000.00,
+      addition: 0.00,
+      wdv: 1600.00,
+      cumulativeDepreciation: 400.00,
+      assetUsage: 'Development Work',
+      assetUsageStatus: 'IN_USE',
+      remarks: 'Developer workstation',
+      department: { connect: { id: adminDepartment.id } },
+      branch: { connect: { id: mainBranch.id } },
+      user: { connect: { id: regularUser.id } },
+      assetType: { connect: { id: laptopType.id } },
+      // Add multiple depreciation records
+      depreciations: {
+        create: [
+          {
+            year: 2023,
+            openingBalance: 2000.00,
+            addition: 0.00,
+            depreciation: 200.00,
+            wdv: 1800.00,
+            cumulativeDepreciation: 200.00,
+            calculatedAt: new Date('2023-12-31')
+          },
+          {
+            year: 2024,
+            openingBalance: 1800.00,
+            addition: 0.00,
+            depreciation: 200.00,
+            wdv: 1600.00,
+            cumulativeDepreciation: 400.00,
+            calculatedAt: new Date('2024-01-15')
+          }
+        ]
+      }
+    }
+  });
+
+  // Create a scrapped asset with depreciation history
+  const oldPrinter = await prisma.asset.create({
+    data: {
+      assetName: 'HP LaserJet',
+      description: 'HP LaserJet Pro',
+      quantity: 1,
+      company: 'HP Inc',
+      location: 'Admin Office',
+      assetCategory: 'Electronics',
+      vendorName: 'HP Store',
+      billDate: new Date('2022-01-15'),
+      billNumber: 'BILL2022003',
+      openingBalance: 1000.00,
+      addition: 0.00,
+      wdv: 500.00,
+      cumulativeDepreciation: 500.00,
+      assetUsage: 'Office Printing',
+      assetUsageStatus: 'SCRAPPED',
+      scrappedAtDate: new Date('2024-01-01'),
+      remarks: 'Old printer - replaced with new model',
+      department: { connect: { id: adminDepartment.id } },
+      branch: { connect: { id: mainBranch.id } },
+      user: { connect: { id: regularUser.id } },
+      assetType: { connect: { id: printerType.id } },
+      // Add depreciation history for scrapped asset
+      depreciations: {
+        create: [
+          {
+            year: 2022,
+            openingBalance: 1000.00,
+            addition: 0.00,
+            depreciation: 200.00,
+            wdv: 800.00,
+            cumulativeDepreciation: 200.00,
+            calculatedAt: new Date('2022-12-31')
+          },
+          {
+            year: 2023,
+            openingBalance: 800.00,
+            addition: 0.00,
+            depreciation: 200.00,
+            wdv: 600.00,
+            cumulativeDepreciation: 400.00,
+            calculatedAt: new Date('2023-12-31')
+          },
+          {
+            year: 2024,
+            openingBalance: 600.00,
+            addition: 0.00,
+            depreciation: 100.00, // Partial year depreciation until scrap date
+            wdv: 500.00,
+            cumulativeDepreciation: 500.00,
+            calculatedAt: new Date('2024-01-01')
+          }
+        ]
+      }
+    }
+  });
+
+  // Create a Scrap Request for the old printer
   const scrapRequest = await prisma.scrapRequest.create({
     data: {
-      reason: 'Device is outdated',
-      status: 'PENDING',
-      asset: { connect: { id: laptop.id } },
+      reason: 'Device is outdated and repair costs exceed value',
+      status: 'APPROVED',
+      asset: { connect: { id: oldPrinter.id } },
       requestedBy: { connect: { id: regularUser.id } },
       currentApprovalLevel: { connect: { id: level1.id } }
     }
-  })
+  });
 
-  // Create an Approval
-  await prisma.approval.create({
-    data: {
-      status: 'APPROVED',
-      comments: 'Approved for scrapping',
-      scrapRequest: { connect: { id: scrapRequest.id } },
-      approvalLevel: { connect: { id: level1.id } },
-      approver: { connect: { id: adminUser.id } }
-    }
-  })
+  console.log('Seed data created successfully');
 }
 
 main()
