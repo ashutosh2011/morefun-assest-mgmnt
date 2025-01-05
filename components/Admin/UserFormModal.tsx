@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Loader2 } from 'lucide-react';
 
@@ -8,6 +8,7 @@ interface UserFormModalProps {
   onSubmit: (data: any) => Promise<void>;
   initialData: any;
   roles: any[];
+  departments: any[];
   loading: boolean;
 }
 
@@ -17,24 +18,55 @@ export function UserFormModal({
   onSubmit,
   initialData,
   roles,
+  departments,
   loading
 }: UserFormModalProps) {
   const [formData, setFormData] = useState({
-    roleId: initialData?.role.id || '',
+    email: initialData?.email || '',
+    username: initialData?.username || '',
+    roleId: initialData?.roleId || initialData?.role?.id || '',
+    departmentId: initialData?.departmentId || initialData?.department?.id || '',
     password: '',
     confirmPassword: '',
   });
 
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        email: initialData.email || '',
+        username: initialData.username || '',
+        roleId: initialData.roleId || initialData.role?.id || '',
+        departmentId: initialData.departmentId || initialData.department?.id || '',
+        password: '',
+        confirmPassword: '',
+      });
+    }
+  }, [initialData]);
+
   const [errors, setErrors] = useState({
+    email: '',
+    username: '',
     password: '',
     confirmPassword: '',
   });
 
   const validateForm = () => {
     const newErrors = {
+      email: '',
+      username: '',
       password: '',
       confirmPassword: '',
     };
+
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+
+    if (!formData.username) {
+      newErrors.username = 'Username is required';
+    }
 
     if (formData.password && formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
@@ -53,7 +85,10 @@ export function UserFormModal({
     if (!validateForm()) return;
 
     const submitData = {
+      email: formData.email,
+      username: formData.username,
       roleId: formData.roleId,
+      departmentId: formData.departmentId || null,
       ...(formData.password && { password: formData.password }),
     };
 
@@ -70,6 +105,38 @@ export function UserFormModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              className="w-full px-3 py-2 border rounded-md"
+              required
+            />
+            {errors.email && (
+              <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Username
+            </label>
+            <input
+              type="text"
+              value={formData.username}
+              onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+              className="w-full px-3 py-2 border rounded-md"
+              required
+            />
+            {errors.username && (
+              <p className="text-sm text-red-500 mt-1">{errors.username}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Role
             </label>
             <select
@@ -82,6 +149,24 @@ export function UserFormModal({
               {roles.map(role => (
                 <option key={role.id} value={role.id}>
                   {role.roleName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Department
+            </label>
+            <select
+              value={formData.departmentId}
+              onChange={(e) => setFormData(prev => ({ ...prev, departmentId: e.target.value }))}
+              className="w-full px-3 py-2 border rounded-md"
+            >
+              <option value="">Select a department</option>
+              {departments.map(dept => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.departmentName}
                 </option>
               ))}
             </select>

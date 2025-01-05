@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { parse } from 'csv-parse';
+import bcrypt from 'bcryptjs';
 
 function generateEmail(name: string): string {
   const cleanName = name.toLowerCase().replace(/[^a-z]/g, '');
@@ -65,6 +66,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Basic user role not found' }, { status: 500 });
     }
 
+    const defaultPassword = await bcrypt.hash('123456', 10);
+
     // Create users
     await prisma.$transaction(
       names.map(fullName => 
@@ -73,7 +76,7 @@ export async function POST(request: Request) {
             fullName,
             username: generateUsername(fullName),
             email: generateEmail(fullName),
-            password: '123456', // TODO: Hash this password
+            password: defaultPassword,
             roleId: basicRole.id,
           },
         })

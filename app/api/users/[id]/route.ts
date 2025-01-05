@@ -18,7 +18,10 @@ export async function PUT(
     
     // Prepare update data
     const updateData: any = {
+      email: data.email,
+      username: data.username,
       roleId: data.roleId,
+      departmentId: data.departmentId,
     };
 
     // Only update password if provided

@@ -32,6 +32,7 @@ interface Role {
 export default function ManageUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [departments, setDepartments] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [loading, setLoading] = useState({
@@ -56,6 +57,7 @@ export default function ManageUsers() {
   useEffect(() => {
     fetchUsers();
     fetchRoles();
+    fetchDepartments();
   }, []);
 
   const fetchUsers = async () => {
@@ -82,6 +84,18 @@ export default function ManageUsers() {
     } catch (error) {
       console.error('Error fetching roles:', error);
       toast.error('Failed to fetch roles');
+    }
+  };
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await fetchWithAuth('/api/departments');
+      if (!response.ok) throw new Error('Failed to fetch departments');
+      const data = await response.json();
+      setDepartments(data);
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+      toast.error('Failed to fetch departments');
     }
   };
 
@@ -190,6 +204,7 @@ export default function ManageUsers() {
           onSubmit={handleSubmit}
           initialData={editingUser}
           roles={roles}
+          departments={departments}
           loading={loading.form}
         />
 
