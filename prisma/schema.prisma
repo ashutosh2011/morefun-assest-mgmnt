@@ -71,8 +71,8 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   // Relations
-  department    Department @relation(fields: [departmentId], references: [id])
-  departmentId  String
+  departmentId  String?
+  department   Department? @relation(fields: [departmentId], references: [id])
   role          Role       @relation(fields: [roleId], references: [id])
   roleId        String
   assets        Asset[]

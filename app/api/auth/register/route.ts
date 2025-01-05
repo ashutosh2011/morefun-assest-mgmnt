@@ -50,12 +50,12 @@ export async function POST(request: Request) {
         username: email,
         password: hashedPassword,
         fullName,
-        // phoneNumber: "999999999",
-        departmentId: "920a9b4b-ca0c-409f-b986-7d1ea00444aa",
         roleId: defaultRole.id,
         isActive: true,
       },
-      include: { role: true },
+      include: { 
+        role: true 
+      },
     });
 
     return NextResponse.json({
