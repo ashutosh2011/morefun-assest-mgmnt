@@ -5,8 +5,9 @@ import { ManagementTable } from '@/components/Admin/ManagementTable';
 import { UserFormModal } from '@/components/Admin/UserFormModal';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Upload } from 'lucide-react';
 import { BackButton } from '@/components/Admin/BackButton';
+import { BulkUserUploadModal } from '@/components/Admin/BulkUserUploadModal';
 
 interface User {
   id: string;
@@ -37,6 +38,7 @@ export default function ManageUsers() {
     table: true,
     form: false,
   });
+  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
 
   const columns = [
     { key: 'fullName', label: 'Full Name' },
@@ -113,6 +115,39 @@ export default function ManageUsers() {
     }
   };
 
+  const handleBulkUpload = async (data: { type: 'file' | 'text', content: File | string }) => {
+    try {
+      setLoading(prev => ({ ...prev, form: true }));
+      
+      const formData = new FormData();
+      if (data.type === 'file') {
+        formData.append('file', data.content as File);
+      } else {
+        formData.append('names', data.content as string);
+      }
+      formData.append('type', data.type);
+      
+      const response = await fetchWithAuth('/api/users/bulk-upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create users');
+      }
+
+      toast.success('Users created successfully');
+      setIsBulkUploadOpen(false);
+      fetchUsers();
+    } catch (error: any) {
+      console.error('Error creating users:', error);
+      toast.error(error.message || 'Failed to create users');
+    } finally {
+      setLoading(prev => ({ ...prev, form: false }));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#ECF0F1]">
       <main className="max-w-7xl mx-auto px-4 py-8">
@@ -127,14 +162,26 @@ export default function ManageUsers() {
             <Loader2 className="w-8 h-8 animate-spin text-[#18BC9C]" />
           </div>
         ) : (
-          <ManagementTable
-            title="Users"
-            description="Manage user roles and passwords"
-            columns={columns}
-            data={users}
-            onEdit={handleEdit}
-            hideAddButton
-          />
+          <div className="space-y-4">
+            <div className="flex justify-end">
+              <button
+                onClick={() => setIsBulkUploadOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-[#18BC9C] text-white rounded-lg hover:bg-[#18BC9C]/90"
+              >
+                <Upload size={20} />
+                Bulk Upload Users
+              </button>
+            </div>
+
+            <ManagementTable
+              title="Users"
+              description="Manage user roles and passwords"
+              columns={columns}
+              data={users}
+              onEdit={handleEdit}
+              hideAddButton
+            />
+          </div>
         )}
 
         <UserFormModal
@@ -143,6 +190,13 @@ export default function ManageUsers() {
           onSubmit={handleSubmit}
           initialData={editingUser}
           roles={roles}
+          loading={loading.form}
+        />
+
+        <BulkUserUploadModal
+          isOpen={isBulkUploadOpen}
+          onClose={() => !loading.form && setIsBulkUploadOpen(false)}
+          onUpload={handleBulkUpload}
           loading={loading.form}
         />
       </main>
