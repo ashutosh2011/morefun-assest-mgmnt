@@ -6,6 +6,7 @@ import { FormModal } from '@/components/Admin/FormModal';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { BackButton } from '@/components/Admin/BackButton';
 
 export default function ManageAssetTypes() {
   const [assetTypes, setAssetTypes] = useState([]);
@@ -127,6 +128,7 @@ export default function ManageAssetTypes() {
   return (
     <div className="min-h-screen bg-[#ECF0F1]">
       <main className="max-w-7xl mx-auto px-4 py-8">
+        <BackButton />
         {loading.table ? (
           <div className="flex items-center justify-center min-h-[400px]">
             <Loader2 className="w-8 h-8 animate-spin text-[#18BC9C]" />

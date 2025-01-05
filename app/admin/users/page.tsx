@@ -6,6 +6,7 @@ import { UserFormModal } from '@/components/Admin/UserFormModal';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { BackButton } from '@/components/Admin/BackButton';
 
 interface User {
   id: string;
@@ -115,6 +116,7 @@ export default function ManageUsers() {
   return (
     <div className="min-h-screen bg-[#ECF0F1]">
       <main className="max-w-7xl mx-auto px-4 py-8">
+        <BackButton />
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-[#2C3E50]">Manage Users</h1>
           <p className="text-gray-600">Configure user roles and passwords</p>

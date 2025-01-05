@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ManagementTable } from '@/components/Admin/ManagementTable';
 import { FormModal } from '@/components/Admin/FormModal';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
+import { BackButton } from '@/components/Admin/BackButton';
 
 export default function ManageRoles() {
   const [roles, setRoles] = useState([]);
@@ -76,6 +77,7 @@ export default function ManageRoles() {
   return (
     <div className="min-h-screen bg-[#ECF0F1]">
       <main className="max-w-7xl mx-auto px-4 py-8">
+        <BackButton />
         <ManagementTable
           title="Manage Roles"
           description="Configure user roles and permissions"

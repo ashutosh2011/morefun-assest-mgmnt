@@ -5,6 +5,7 @@ import { Plus, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { ApprovalFlowModal } from '@/components/Admin/ApprovalFlowModal';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { toast } from 'sonner';
+import { BackButton } from '@/components/Admin/BackButton';
 
 export default function ManageApprovalFlows() {
   const [approvalFlows, setApprovalFlows] = useState([]);
@@ -77,6 +78,7 @@ export default function ManageApprovalFlows() {
   return (
     <div className="min-h-screen bg-[#ECF0F1]">
       <main className="max-w-7xl mx-auto px-4 py-8">
+        <BackButton />
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold text-[#2C3E50]">Approval Workflows</h1>
