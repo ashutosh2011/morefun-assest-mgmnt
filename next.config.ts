@@ -2,12 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ['@prisma/client', 'prisma'],
+    serverActions: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
   },
-  typescript:{
+  typescript: {
     ignoreBuildErrors: true,
   }
 };
