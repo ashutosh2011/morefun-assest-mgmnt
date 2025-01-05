@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/depreciation",
+      "schedule": "1 0 31 3 *"
+    }
+  ]
+} 
