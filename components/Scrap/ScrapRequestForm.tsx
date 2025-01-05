@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 
@@ -23,6 +23,7 @@ interface SelectedAsset {
 
 export function ScrapRequestForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     assetId: '',
@@ -40,12 +41,27 @@ export function ScrapRequestForm() {
         if (!response.ok) throw new Error('Failed to fetch assets');
         const data = await response.json();
         setAssets(data.assets);
+
+        // Check for assetId in URL params
+        const assetId = searchParams.get('assetId');
+        if (assetId) {
+          const asset = data.assets.find(a => a.id === assetId);
+          if (asset) {
+            setSelectedAsset({
+              id: asset.id,
+              assetName: asset.assetName,
+              billNumber: asset.billNumber,
+              assetTypeName: asset.assetType.assetTypeName
+            });
+            setFormData(prev => ({ ...prev, assetId: asset.id }));
+          }
+        }
       } catch (err) {
         toast.error('Failed to load assets');
       }
     };
     fetchAssets();
-  }, []);
+  }, [searchParams]);
 
   const handleAssetSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const asset = assets.find(a => a.id === e.target.value);

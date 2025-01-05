@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Eye, Loader2, Pencil } from 'lucide-react';
+import { Eye, Loader2, Pencil, Trash2 } from 'lucide-react';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { AssetDetailsModal } from './AssetDetailsModal';
 import { ManagementTable } from '../Admin/ManagementTable';
@@ -153,6 +153,16 @@ export function AssetTable() {
         title="Edit Asset"
       >
         <Pencil size={20} />
+      </button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          router.push(`/scrap-request?assetId=${row.id}`);
+        }}
+        className="text-red-500 hover:text-red-700 p-1"
+        title="Request Scrap"
+      >
+        <Trash2 size={20} />
       </button>
     </div>
   );
