@@ -113,7 +113,7 @@ For support, email support@example.com or create an issue in the repository.
 
 ### 1. Authentication & Authorization
 - [ ] User Registration
-  - [ ] Valid email format validation
+  - [ X ] Valid email format validation
   - [ ] Password strength requirements
   - [ ] Duplicate email prevention
   - [ ] Success/error messages
