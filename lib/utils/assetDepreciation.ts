@@ -67,7 +67,7 @@ export async function createAssetWithDepreciation(
     data: {
       ...assetData,
       wdv: assetData.openingBalance + assetData.addition,
-      cumulativeDepreciation: 0,
+    //   cumulativeDepreciation: 0,
       lastDepreciationDate: new Date(),
     },
     include: {
@@ -96,7 +96,7 @@ export async function createAssetWithDepreciation(
     where: { id: asset.id },
     data: {
       wdv: lastDepreciation.wdv,
-      cumulativeDepreciation: lastDepreciation.cumulativeDepreciation
+    //   cumulativeDepreciation: lastDepreciation.cumulativeDepreciation
     },
     include: {
       assetType: true,
