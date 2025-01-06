@@ -134,9 +134,23 @@ export function AssetForm({ assetId }: AssetFormProps) {
           
           setFormData({
             customAssetId: asset.customAssetId || '',
-            name: asset.assetName,
+            name: asset.assetName || '',
             description: asset.description || '',
-            // ... map other fields
+            departmentId: asset.departmentId || '',
+            assetUsage: asset.assetUsage || '',
+            company: asset.company || '',
+            location: asset.location || '',
+            assetCategory: asset.assetCategory || '',
+            vendorName: asset.vendorName || '',
+            billDate: asset.billDate ? new Date(asset.billDate).toISOString().split('T')[0] : '',
+            billNumber: asset.billNumber || '',
+            openingBalance: asset.openingBalance?.toString() || '',
+            addition: asset.addition?.toString() || '',
+            remarks: asset.remarks || '',
+            assetTypeId: asset.assetTypeId || '',
+            branchId: asset.branchId || '',
+            assignedUserId: asset.userId || '',
+            assetUsageStatus: asset.assetUsageStatus || '',
           });
         } catch (error) {
           console.error('Error fetching asset:', error);
@@ -162,12 +176,21 @@ export function AssetForm({ assetId }: AssetFormProps) {
     e.preventDefault();
     try {
       setIsSubmitting(true);
+      
+      const submitData = {
+        ...formData,
+        assetName: formData.name,
+        branchId: formData.location,
+        openingBalance: parseFloat(formData.openingBalance),
+        addition: parseFloat(formData.addition),
+      };
+
       const response = await fetchWithAuth(`/api/assets${assetId ? `/${assetId}` : ''}`, {
         method: assetId ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       });
 
       if (!response.ok) {
@@ -188,10 +211,6 @@ export function AssetForm({ assetId }: AssetFormProps) {
   if (loading || loadingAsset) {
     return <div>Loading...</div>;
   }
-
-  const buttonText = isSubmitting 
-    ? (assetId ? 'Updating...' : 'Creating...') 
-    : (assetId ? 'Update Asset' : 'Create Asset');
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 max-w-5xl mx-auto">
@@ -493,10 +512,10 @@ export function AssetForm({ assetId }: AssetFormProps) {
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Creating...</span>
+                <span>{assetId ? 'Updating...' : 'Creating...'}</span>
               </>
             ) : (
-              <span>Create Asset</span>
+              <span>{assetId ? 'Update Asset' : 'Create Asset'}</span>
             )}
           </button>
         </div>

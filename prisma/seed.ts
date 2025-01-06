@@ -8,6 +8,7 @@ async function main() {
   await prisma.$transaction([
     prisma.approval.deleteMany(),
     prisma.scrapRequest.deleteMany(),
+    prisma.assetDepreciation.deleteMany(),
     prisma.asset.deleteMany(),
     prisma.approvalLevel.deleteMany(),
     prisma.user.deleteMany(),
@@ -66,14 +67,24 @@ async function main() {
   const laptopType = await prisma.assetType.create({
     data: {
       assetTypeName: 'Laptop',
-      description: 'Portable computers'
+      description: 'Portable computers',
+      depreciationPercentage: 10
     }
   })
 
   const desktopType = await prisma.assetType.create({
     data: {
       assetTypeName: 'Desktop',
-      description: 'Desktop computers'
+      description: 'Desktop computers',
+      depreciationPercentage: 10
+    }
+  })
+
+  const printerType = await prisma.assetType.create({
+    data: {
+      assetTypeName: 'Printer',
+      description: 'Printers',
+      depreciationPercentage: 5
     }
   })
 
@@ -149,7 +160,6 @@ async function main() {
       openingBalance: 1500.00,
       addition: 0.00,
       wdv: 1400.00,
-      cumulativeDepreciation: 100.00,
       assetUsage: 'Administrative Tasks',
       assetUsageStatus: 'IN_USE',
       remarks: 'High-performance workstation',
@@ -187,7 +197,6 @@ async function main() {
       openingBalance: 2000.00,
       addition: 0.00,
       wdv: 1600.00,
-      cumulativeDepreciation: 400.00,
       assetUsage: 'Development Work',
       assetUsageStatus: 'IN_USE',
       remarks: 'Developer workstation',
@@ -236,7 +245,6 @@ async function main() {
       openingBalance: 1000.00,
       addition: 0.00,
       wdv: 500.00,
-      cumulativeDepreciation: 500.00,
       assetUsage: 'Office Printing',
       assetUsageStatus: 'SCRAPPED',
       scrappedAtDate: new Date('2024-01-01'),

@@ -27,7 +27,6 @@ interface Asset {
   addition: number | null;
   depreciation: number | null;
   wdv: number | null;
-  cumulativeDepreciation: number | null;
   remarks: string | null;
   assetUsageStatus: string;
   createdAt: string;
@@ -114,7 +113,6 @@ export function AssetDetailsModal({ asset, isOpen, onClose }: AssetDetailsModalP
                 <p><span className="font-medium">Depreciation Rate:</span> {formatPercentage(asset.assetType?.depreciationPercentage)}</p>
                 <p><span className="font-medium">Current Depreciation:</span> Rs.{formatCurrency(asset.depreciation)}</p>
                 <p><span className="font-medium">Written Down Value:</span> Rs.{formatCurrency(asset.wdv)}</p>
-                <p><span className="font-medium">Cumulative Depreciation:</span> Rs.{formatCurrency(asset.cumulativeDepreciation)}</p>
               </div>
             </div>
 

@@ -7,22 +7,16 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = await auth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const id = await params.id;
 
     const asset = await prisma.asset.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         department: true,
         branch: true,
-        user: true,
         assetType: true,
-        depreciations: true,
-        activities: {
-          orderBy: { createdAt: 'desc' }
-        }
+        user: true,
+        depreciations: true
       }
     });
 
@@ -45,19 +39,39 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = await auth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    const id = await params.id;
     const data = await request.json();
+
+    // Transform the data if needed
+    const updateData = {
+      assetName: data.assetName,
+      description: data.description,
+      assetUsage: data.assetUsage,
+      company: data.company,
+      location: data.location,
+      assetCategory: data.assetCategory,
+      vendorName: data.vendorName,
+      billDate: new Date(data.billDate),
+      billNumber: data.billNumber,
+      openingBalance: parseFloat(data.openingBalance),
+      addition: parseFloat(data.addition),
+      remarks: data.remarks,
+      assetTypeId: data.assetTypeId,
+      branchId: data.branchId,
+      userId: data.assignedUserId,
+      departmentId: data.departmentId,
+      assetUsageStatus: data.assetUsageStatus,
+      customAssetId: data.customAssetId,
+    };
+
     const asset = await prisma.asset.update({
-      where: { id: params.id },
-      data: {
-        // Add update fields here
-        assetName: data.name,
-        description: data.description,
-        // ... other fields
+      where: { id },
+      data: updateData,
+      include: {
+        department: true,
+        branch: true,
+        assetType: true,
+        user: true
       }
     });
 

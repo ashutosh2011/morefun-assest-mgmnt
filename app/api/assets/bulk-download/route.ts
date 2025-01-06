@@ -70,7 +70,6 @@ export async function GET(request: Request) {
         'Opening Balance': asset.openingBalance,
         'Addition': asset.addition,
         'Current WDV': asset.wdv,
-        'Current Cumulative Depreciation': asset.cumulativeDepreciation,
         'Last Depreciation Date': asset.lastDepreciationDate?.toLocaleDateString() || 'N/A',
         'Depreciation History': depreciationHistory,
         'Usage': asset.assetUsage || 'N/A',

@@ -75,7 +75,6 @@ export async function POST(request: Request) {
             depreciation: 0,
             quantity: 1,
             wdv: parseFloat(row.openingBalance || '0') + parseFloat(row.addition || '0'),
-            // cumulativeDepreciation: 0,
             remarks: row.remarks,
             assetUsageStatus: 'IN_USE',
             department: row.departmentId ? {
