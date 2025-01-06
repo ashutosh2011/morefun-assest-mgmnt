@@ -115,7 +115,7 @@ export function AssetForm({ assetId }: AssetFormProps) {
         setAssetCategories(categoriesData);
         setDepartments(departmentsData);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.log('Error fetching data:', error);
       } finally {
         setLoading(false);
       }

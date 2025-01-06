@@ -1,16 +1,20 @@
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = await params.id;
+    if (!params?.id) {
+      return new Response(JSON.stringify({ error: 'Asset ID is required' }), {
+        status: 400,
+      });
+    }
 
     const asset = await prisma.asset.findUnique({
-      where: { id },
+      where: { id: params.id },
       include: {
         department: true,
         branch: true,
@@ -21,25 +25,31 @@ export async function GET(
     });
 
     if (!asset) {
-      return NextResponse.json({ error: 'Asset not found' }, { status: 404 });
+      return new Response(JSON.stringify({ error: 'Asset not found' }), {
+        status: 404,
+      });
     }
 
-    return NextResponse.json(asset);
+    return new Response(JSON.stringify(asset));
   } catch (error) {
     console.error('Error fetching asset:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch asset' },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: 'Failed to fetch asset' }), {
+      status: 500,
+    });
   }
 }
 
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = await params.id;
+    if (!params?.id) {
+      return new Response(JSON.stringify({ error: 'Asset ID is required' }), {
+        status: 400,
+      });
+    }
+
     const data = await request.json();
 
     // Transform the data if needed
@@ -65,7 +75,7 @@ export async function PUT(
     };
 
     const asset = await prisma.asset.update({
-      where: { id },
+      where: { id: params.id },
       data: updateData,
       include: {
         department: true,
@@ -75,12 +85,11 @@ export async function PUT(
       }
     });
 
-    return NextResponse.json(asset);
+    return new Response(JSON.stringify(asset));
   } catch (error) {
     console.error('Error updating asset:', error);
-    return NextResponse.json(
-      { error: 'Failed to update asset' },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: 'Failed to update asset' }), {
+      status: 500,
+    });
   }
 } 

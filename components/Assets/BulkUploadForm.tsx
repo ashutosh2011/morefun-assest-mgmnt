@@ -297,7 +297,7 @@ export function BulkUploadForm() {
                     <tbody className="divide-y">
                       {referenceData?.branches.map(branch => (
                         <tr key={branch.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-2 text-sm">{branch.name}</td>
+                          <td className="px-4 py-2 text-sm">{branch.branchName}</td>
                           <td className="px-4 py-2 text-sm font-mono">{branch.id}</td>
                         </tr>
                       ))}

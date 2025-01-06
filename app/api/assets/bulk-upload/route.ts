@@ -72,7 +72,6 @@ export async function POST(request: Request) {
             billNumber: row.billNumber,
             openingBalance: parseFloat(row.openingBalance || '0'),
             addition: parseFloat(row.addition || '0'),
-            depreciation: 0,
             quantity: 1,
             wdv: parseFloat(row.openingBalance || '0') + parseFloat(row.addition || '0'),
             remarks: row.remarks,
@@ -134,7 +133,7 @@ export async function POST(request: Request) {
     });
 
   } catch (error) {
-    console.error('Bulk upload error:', error);
+    console.log('Bulk upload error:', error);
     return NextResponse.json(
       { error: 'Failed to process file', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
