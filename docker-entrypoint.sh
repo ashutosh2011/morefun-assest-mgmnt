@@ -9,14 +9,17 @@ while ! nc -z db 5432; do
 done
 echo "PostgreSQL is ready!"
 
-# Run migrations
-echo "Running database migrations..."
-npx prisma migrate reset --force
+# Check if database is empty by checking if any users exist
+echo "Checking if database needs initialization..."
+USER_COUNT=$(npx prisma query 'SELECT COUNT(*) FROM users;' --json | grep -o '[0-9]*')
 
-# The above command will also run the seed script
-# But if you want to run seed separately, uncomment the following:
-# echo "Running database seed..."
-# npx prisma db seed
+if [ "$USER_COUNT" = "0" ]; then
+  echo "Database is empty. Running migrations and seed..."
+  npx prisma migrate reset --force
+else
+  echo "Database already contains data. Running only migrations..."
+  npx prisma migrate deploy
+fi
 
 # Start the application
 echo "Starting the application..."
