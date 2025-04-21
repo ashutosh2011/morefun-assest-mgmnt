@@ -16,7 +16,7 @@ export function BulkUploadForm() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorFile, setErrorFile] = useState<string | null>(null);
+  const [errors, setErrors] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [referenceData, setReferenceData] = useState<ReferenceData | null>(null);
   const [expandedTables, setExpandedTables] = useState<Record<string, boolean>>({
@@ -89,7 +89,7 @@ export function BulkUploadForm() {
       setFile(selectedFile);
       setError(null);
       setSuccessMessage(null);
-      setErrorFile(null);
+      setErrors([]);
     }
   };
 
@@ -100,7 +100,7 @@ export function BulkUploadForm() {
     setProgress(0);
     setError(null);
     setSuccessMessage(null);
-    setErrorFile(null);
+    setErrors([]);
 
     const formData = new FormData();
     formData.append('file', file);
@@ -118,13 +118,13 @@ export function BulkUploadForm() {
 
       const data = await response.json();
       
-      // Update progress and handle error file if any
+      // Update progress and handle errors if any
       if (data.results && data.results.length > 0) {
         const lastResult = data.results[data.results.length - 1];
         setProgress(lastResult.progress);
         
-        if (lastResult.errorFile) {
-          setErrorFile(lastResult.errorFile);
+        if (lastResult.errors) {
+          setErrors(lastResult.errors);
         }
       }
 
@@ -253,21 +253,30 @@ export function BulkUploadForm() {
         </div>
       )}
 
-      {/* Error File Download */}
-      {errorFile && (
-        <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-center gap-2 text-yellow-700 mb-2">
-            <AlertCircle size={20} />
-            Some rows could not be processed
+      {/* Error Table */}
+      {errors.length > 0 && (
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold text-[#2C3E50] mb-4">Errors Found</h3>
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white border border-gray-200">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Row</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset Name</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Error</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {errors.map((error, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-4 py-2 text-sm text-gray-900">{index + 1}</td>
+                    <td className="px-4 py-2 text-sm text-gray-900">{error.name || 'N/A'}</td>
+                    <td className="px-4 py-2 text-sm text-red-600">{error.error}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <a
-            href={errorFile}
-            download
-            className="flex items-center gap-2 text-[#18BC9C] hover:text-[#18BC9C]/80"
-          >
-            <FileDown size={20} />
-            Download error report
-          </a>
         </div>
       )}
 

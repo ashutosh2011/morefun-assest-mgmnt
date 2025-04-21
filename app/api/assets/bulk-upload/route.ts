@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     const data = XLSX.utils.sheet_to_json<AssetRowData>(worksheet);
 
     const errors: AssetRowData[] = [];
-    const results: { progress: number; errorFile?: string }[] = [];
+    const results: { progress: number; errors?: AssetRowData[] }[] = [];
     
     // Process each row
     for (let i = 0; i < data.length; i++) {
@@ -100,36 +100,17 @@ export async function POST(request: Request) {
 
       // Add progress to results
       results.push({
-        progress: Math.round(((i + 1) / data.length) * 100)
+        progress: Math.round(((i + 1) / data.length) * 100),
+        errors: errors.length > 0 ? errors : undefined
       });
-    }
-
-    // If there are errors, create and save error report
-    if (errors.length > 0) {
-      // Create error report worksheet
-      const errorWs = XLSX.utils.json_to_sheet(errors);
-      const errorWb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(errorWb, errorWs, 'Errors');
-
-      // Create directory if it doesn't exist
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-      await createDirIfNotExists(uploadDir);
-
-      // Save error file
-      const fileName = `error-report-${Date.now()}.xlsx`;
-      const filePath = path.join(uploadDir, fileName);
-      const buffer = XLSX.write(errorWb, { type: 'buffer', bookType: 'xlsx' });
-      await writeFile(filePath, buffer);
-
-      // Add error file URL to last result
-      results[results.length - 1].errorFile = `/uploads/${fileName}`;
     }
 
     return NextResponse.json({
       success: true,
       results,
       totalProcessed: data.length,
-      errorsCount: errors.length
+      errorsCount: errors.length,
+      errors: errors.length > 0 ? errors : undefined
     });
 
   } catch (error) {
